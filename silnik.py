@@ -254,10 +254,7 @@ def showGUI(dum_df, dataset, products):
         
     clicked = form.form_submit_button("Wyślij")
     if clicked:
-        #st.session_state.accuracy = df
-        # with st.spinner('Tworzę Twój plan pielęgnacyjny...'):
-        #     time.sleep(5)
-        # st.success('Skończone!')
+        
         my_dataframe = {'Typ cery': typ_cery,
                     'Główny problem': glowny_problem,
                     'Poboczny problem': poboczny_problem,
@@ -270,6 +267,10 @@ def showGUI(dum_df, dataset, products):
             #print(i, " - " ,result)
             resultSkinCare[i] = result
 
+        st.session_state.accuracy = df
+        with st.spinner('Tworzę Twój plan pielęgnacyjny...'):
+            time.sleep(4)
+        st.success('Skończone!')
    
         st.header('Proponowana pielęgnacja')
         st.subheader('Mycie')
