@@ -72,71 +72,9 @@ def makeSingleProblemTree(problem_name, dum_df, dataset):
     accuracy[problem_name] = str(accuracy_score(y_test, y_pred)*100) # "{} - Accuracy : {}".format(problem_name,accuracy_score(y_test, y_pred)*100)
     
     unique_values = dataset[problem_name].unique()
-    # fig = plt.subplots(figsize=(5,5))
-    # tree.plot_tree(model, 
-    #                 filled=True, 
-    #                 rounded=True, 
-    #                 feature_names=cols_names, 
-    #                 class_names=unique_values)
-    # plt.savefig("{}_skinCare_tree.pdf".format(problem_name))
-    # sn.heatmap(matrix, annot=True)
     
     graph_counter = graph_counter + 1
     return model
-
-def createDummies(dataset_to_encode):
-    dum_cera = pd.get_dummies(dataset_to_encode['Typ cery'])
-    dum_glowny_problem = pd.get_dummies(dataset_to_encode['Główny problem'])
-    dum_poboczny_problem = pd.get_dummies(dataset_to_encode['Poboczny problem'])
-    dum_wrazliwa = pd.get_dummies(dataset_to_encode['Wrażliwa'])
-    dum_wiek = pd.get_dummies(dataset_to_encode['Wiek'])
-    dum_mycie = pd.get_dummies(dataset_to_encode['Mycie'])
-    dum_serum_dzien = pd.get_dummies(dataset_to_encode['Serum na dzień'])
-    dum_krem_dzien = pd.get_dummies(dataset_to_encode['Krem na dzień'])
-    dum_spf = pd.get_dummies(dataset_to_encode['SPF'])
-    dum_serum_noc = pd.get_dummies(dataset_to_encode['Serum na noc'])
-    dum_krem_noc = pd.get_dummies(dataset_to_encode['Krem na noc'])
-    dum_punktowo = pd.get_dummies(dataset_to_encode['Punktowo'])
-    dum_maseczka = pd.get_dummies(dataset_to_encode['Maseczka'])
-    dum_peeling = pd.get_dummies(dataset_to_encode['Peeling'])
-
-    frames = [
-                dum_cera,
-                dum_glowny_problem, 
-                dum_poboczny_problem,
-                dum_wrazliwa,
-                dum_wiek,
-                dum_mycie, 
-                dum_serum_dzien, 
-                dum_krem_dzien, 
-                dum_spf, 
-                dum_serum_noc, 
-                dum_krem_noc, 
-                dum_punktowo,
-                dum_maseczka,
-                dum_peeling
-                ]
-
-    dum_df = pd.concat(frames, axis=1) 
-
-    return dum_df
-
-def createSinglePredictionDummies(dataset_to_encode):
-    dum_cera = pd.get_dummies(dataset_to_encode['Typ cery'])
-    dum_glowny_problem = pd.get_dummies(dataset_to_encode['Główny problem'])
-    dum_poboczny_problem = pd.get_dummies(dataset_to_encode['Poboczny problem'])
-    dum_wrazliwa = pd.get_dummies(dataset_to_encode['Wrażliwa'])
-    dum_wiek = pd.get_dummies(dataset_to_encode['Wiek'])
-
-    frames = [
-                dum_cera,
-                dum_glowny_problem, 
-                dum_poboczny_problem,
-                dum_wrazliwa,
-                dum_wiek
-                ]
-
-    return frames
 
 def predictMyObject(model, my_object, column_name):
     global encoders
@@ -186,8 +124,6 @@ def setPhoto(category, side):
                 st.image(value, width=150)
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
-            
-
 
 def showGUI(dum_df, dataset, products):
     global typ_cery, czy_wrazliwa, glowny_problem, poboczny_problem, wiek, accuracy
@@ -301,20 +237,6 @@ def showGUI(dum_df, dataset, products):
 
         st.stop()
 
-
-            
-def createOneHotEncoding(dataset_to_encode):
-    final_df = dataset_to_encode
-
-    for i in all_columns:
-        encoder = OneHotEncoder(handle_unknown='ignore')
-        encoder_df = pd.DataFrame(encoder.fit_transform(dataset_to_encode[[i]]).toarray())
-        final_df = final_df.join(encoder_df)
-        final_df.drop(i, axis=1, inplace=True)
-        print(encoder.categories_)
-        
-    return final_df
-
 def createLabelEncoding(dataset_to_encode):
     global encoders, labelsDescription
     
@@ -325,15 +247,6 @@ def createLabelEncoding(dataset_to_encode):
         dataset_to_encode[i] = encoders[i].transform(dataset_to_encode[i])
         
     return dataset_to_encode
-
-def createSingleLabelEncoding(to_encode):
-    global encoders
-    to_encode_df = pd.DataFrame.from_dict([to_encode])
-
-    for i in categorical_cols_names:
-        to_encode_df[i] = encoders[i].transform(to_encode_df[i])
-
-    return to_encode_df
 
 def main():
     global products
