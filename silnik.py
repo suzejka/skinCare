@@ -1,3 +1,4 @@
+from msilib.schema import Error
 from operator import concat
 from pickle import FALSE
 import pandas as pd
@@ -7,85 +8,87 @@ from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
+import seaborn as sn
+import numpy as np
+from collections import Counter
 import time
 import streamlit as st
 
-graphCounter = 1
+graph_counter = 1
 
 encoder = None
 encoders = {}
 labelsDescription = {}
-skinType = None
-isSensitive = None
-mainProblem = None
-secondProblem = None
-age = None
+typ_cery = None
+czy_wrazliwa = None
+glowny_problem = None
+poboczny_problem = None
+wiek = None
 resultSkinCare = {}
 models = []
 accuracy = {}
 products = {}
 
-askedColumnNames = ['Typ cery', 'Główny problem', 'Poboczny problem', 'Wrażliwa','Wiek']
-categoricalColumnNames = ['Typ cery', 'Główny problem', 'Poboczny problem']
-decisionColumnNames = ['Mycie','Serum na dzień','Krem na dzień','SPF','Serum na noc','Krem na noc','Punktowo','Maseczka','Peeling']
-allColumns = askedColumnNames + decisionColumnNames
-allCategoricalColumns = categoricalColumnNames + decisionColumnNames
+cols_names = ['Typ cery', 'Główny problem', 'Poboczny problem', 'Wrażliwa','Wiek']
+categorical_cols_names = ['Typ cery', 'Główny problem', 'Poboczny problem']
+decision_column_names = ['Mycie','Serum na dzień','Krem na dzień','SPF','Serum na noc','Krem na noc','Punktowo','Maseczka','Peeling']
+all_columns = cols_names + decision_column_names
+all_categorical_columns = categorical_cols_names + decision_column_names
 
 def clearText(text):
     text = str(text).replace("'","").replace("[","").replace("]","")
     return text
 
-def makeSingleProblemTree(problemName, dum_df, dataset):
-    problemIndex = 0
-    global graphCounter, accuracy
-    match problemName:
+def makeSingleProblemTree(problem_name, dum_df, dataset):
+    problem_index = 0
+    global graph_counter, accuracy
+    match problem_name:
         case 'Mycie':
-            problemIndex = 6
+            problem_index = 6
         case 'Serum na dzień':
-            problemIndex = 7
+            problem_index = 7
         case 'Krem na dzień':
-            problemIndex = 8
+            problem_index = 8
         case 'SPF' :
-            problemIndex = 9
+            problem_index = 9
         case 'Serum na noc':
-            problemIndex = 10
+            problem_index = 10
         case 'Krem na noc':
-            problemIndex = 11
+            problem_index = 11
         case 'Punktowo':
-            problemIndex = 12
+            problem_index = 12
         case 'Maseczka':
-            problemIndex = 13
+            problem_index = 13
         case 'Peeling':
-            problemIndex = 14
+            problem_index = 14
         case _:        
             print('Error')
-
     X = dum_df.values[:, 1:6]
-    Y_problem = dataset.values[:, problemIndex]
+    Y_problem = dataset.values[:, problem_index]
     X_train, X_test, y_train, y_test = train_test_split(X, Y_problem, test_size = 0.25, random_state = 100)
     model = DecisionTreeClassifier(max_depth=10)
     model = model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
-    accuracy[problemName] = str(accuracy_score(y_test, y_pred)*100) # "{} - Accuracy : {}".format(problem_name,accuracy_score(y_test, y_pred)*100)
+    accuracy[problem_name] = str(accuracy_score(y_test, y_pred)*100) # "{} - Accuracy : {}".format(problem_name,accuracy_score(y_test, y_pred)*100)
     
-    unique_values = dataset[problemName].unique()
+    unique_values = dataset[problem_name].unique()
     
-    graphCounter = graphCounter + 1
+    graph_counter = graph_counter + 1
     return model
 
-def predictMyObject(model, myObject, columnName):
+def predictMyObject(model, my_object, column_name):
     global encoders
     
-    for i in categoricalColumnNames:
+    for i in categorical_cols_names:
         labelsDescription = encoders[i].classes_
         labelsDescription = labelsDescription.tolist()
         for l in labelsDescription:
-            if myObject[i].item() == l:
-                print("Klasa - ", myObject[i].item(), "Label -> ", labelsDescription.index(l))
-                myObject[i] = labelsDescription.index(l)
+            if my_object[i].item() == l:
+                print("Klasa - ", my_object[i].item(), "Label -> ", labelsDescription.index(l))
+                my_object[i] = labelsDescription.index(l)
         # my_object[i] = np.where(labelsDescription == my_object[i])
-    prediction = model.predict(myObject)
-    prediction = encoders[columnName].inverse_transform(prediction)
+    prediction = model.predict(my_object)
+    prediction = encoders[column_name].inverse_transform(prediction)
     return prediction
 
 def setPhoto(category, side):
@@ -122,15 +125,21 @@ def setPhoto(category, side):
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
 
-def showGUI(dumDf, dataset, products):
-    global skinType, isSensitive, mainProblem, secondProblem, age, accuracy
+def showGUI(dum_df, dataset, products):
+    global typ_cery, czy_wrazliwa, glowny_problem, poboczny_problem, wiek, accuracy
 
     st.set_page_config(
-     page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych")
+     page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
+     menu_items={
+         'Get Help': 'https://www.extremelycoolapp.com/help',
+         'Report a bug': "https://www.extremelycoolapp.com/bug",
+         'About': "# Praca inżynierska. *s20943*"
+        }
+    )
 
     form = st.form("my_form")
     form.subheader('Jaki masz typ cery?')
-    skinType = form.radio(
+    typ_cery = form.radio(
      "",
      ('Tłusta', 
      'Normalna', 
@@ -138,18 +147,18 @@ def showGUI(dumDf, dataset, products):
      'Sucha'))
 
     form.subheader('Czy Twoja cera jest wrażliwa?')
-    isSensitive = form.radio(
+    czy_wrazliwa = form.radio(
      "",
      ('Tak', 
      'Nie'))
 
-    if isSensitive == 'Tak':
-        isSensitive = 1
-    elif isSensitive == 'Nie':
-        isSensitive = 0
+    if czy_wrazliwa == 'Tak':
+        czy_wrazliwa = 1
+    elif czy_wrazliwa == 'Nie':
+        czy_wrazliwa = 0
 
     form.subheader('Jaki jest Twój największy problem z cerą?')        
-    mainProblem = form.radio(
+    glowny_problem = form.radio(
      "",
      ('Nadprodukcja sebum', 
      'Niedoskonałości', 
@@ -161,7 +170,7 @@ def showGUI(dumDf, dataset, products):
      'Widoczne naczynka'))
 
     form.subheader('Czy jeszcze z czymś się zmagasz?')        
-    secondProblem = form.radio(
+    poboczny_problem = form.radio(
      "",
      ('Nie mam więcej problemów z cerą',
      'Nadprodukcja sebum', 
@@ -173,30 +182,30 @@ def showGUI(dumDf, dataset, products):
      'Szara cera',
      'Widoczne naczynka'))
 
-    if secondProblem == 'Nie mam więcej problemów z cerą':
-        secondProblem = 'Brak'
+    if poboczny_problem == 'Nie mam więcej problemów z cerą':
+        poboczny_problem = 'Brak'
     
     form.subheader('Ile masz lat?')
-    age = form.slider("", 16, 60)
+    wiek = form.slider("", 16, 60)
         
     clicked = form.form_submit_button("Wyślij")
     if clicked:
         
-        resultDict = {'Typ cery': skinType,
-                    'Główny problem': mainProblem,
-                    'Poboczny problem': secondProblem,
-                    'Wrażliwa': isSensitive,
-                    'Wiek': age}
-        resultDataframe = pd.DataFrame.from_dict([resultDict])
-        for i in decisionColumnNames:
-            problemModel = makeSingleProblemTree(i, dumDf, dataset)
-            result = predictMyObject(problemModel, resultDataframe, i)
+        my_dataframe = {'Typ cery': typ_cery,
+                    'Główny problem': glowny_problem,
+                    'Poboczny problem': poboczny_problem,
+                    'Wrażliwa': czy_wrazliwa,
+                    'Wiek': wiek}
+        df = pd.DataFrame.from_dict([my_dataframe])
+        for i in decision_column_names:
+            problemModel = makeSingleProblemTree(i, dum_df, dataset)
+            result = predictMyObject(problemModel, df, i)
             #print(i, " - " ,result)
             resultSkinCare[i] = result
 
-        st.session_state.accuracy = resultDataframe
+        st.session_state.accuracy = df
         with st.spinner('Tworzę Twój plan pielęgnacyjny...'):
-            time.sleep(3)
+            time.sleep(4)
         st.success('Skończone!')
    
         st.header('Proponowana pielęgnacja')
@@ -222,22 +231,22 @@ def showGUI(dumDf, dataset, products):
         devClicked = st.button("Strefa dewelopera")
         #if devClicked:
             #open("dev_page.py")
-        resultDataframe = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
+        df = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
          
-        st.dataframe(data=resultDataframe)
+        st.dataframe(data=df)
 
         st.stop()
 
-def createLabelEncoding(datasetToEncode):
+def createLabelEncoding(dataset_to_encode):
     global encoders, labelsDescription
     
-    for i in allCategoricalColumns:
+    for i in all_categorical_columns:
         encoders[i] = LabelEncoder()
-        uniqueValues = list(datasetToEncode[i].unique())
-        encoders[i] = encoders[i].fit(uniqueValues)
-        datasetToEncode[i] = encoders[i].transform(datasetToEncode[i])
+        unique_values = list(dataset_to_encode[i].unique())
+        encoders[i] = encoders[i].fit(unique_values)
+        dataset_to_encode[i] = encoders[i].transform(dataset_to_encode[i])
         
-    return datasetToEncode
+    return dataset_to_encode
 
 def main():
     global products
@@ -245,8 +254,8 @@ def main():
     products = products.to_dict()
     dataset = pd.read_csv("daneSkinCare.csv", sep=';')
     dataset = dataset.loc[:, ~dataset.columns.str.contains('^Unnamed')]
-    encodedDataframe = createLabelEncoding(dataset)
-    showGUI(encodedDataframe, dataset, products)
+    dum_df = createLabelEncoding(dataset)
+    showGUI(dum_df, dataset, products)
 
 if __name__ == '__main__':
     main()
