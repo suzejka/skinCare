@@ -137,7 +137,7 @@ def showGUI(dum_df, dataset, products):
     st.set_page_config(
      page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
      menu_items={
-        'Report a bug': "https://forms.gle/5KV7rdhNi8epigL26"
+        'Report a bug': "https://forms.gle/5KV7rdhNi8epigL26",
          'About': "# Praca inżynierska. *s20943*"
         }
     )
