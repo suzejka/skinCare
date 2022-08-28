@@ -1,17 +1,8 @@
-from msilib.schema import Error
-from operator import concat
-from pickle import FALSE
-from this import d
 import pandas as pd
-from matplotlib import pyplot as plt
-from sklearn import preprocessing, tree
-from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
-import seaborn as sn
-import numpy as np
-from collections import Counter
 import time
 import streamlit as st
 
