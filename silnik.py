@@ -14,7 +14,7 @@ labelsDescription = {}
 skinType = None
 isSensitive = None
 mainProblem = None
-mainProblem = None
+secondProblem = None
 age = None
 resultSkinCare = {}
 models = []
@@ -129,7 +129,7 @@ def setPhoto(category, side):
             st.markdown(clearText(resultSkinCare.get(category)))
 
 def showGUI(dum_df, dataset, products):
-    global skinType, isSensitive, mainProblem, mainProblem, age, accuracy
+    global skinType, isSensitive, mainProblem, secondProblem, age, accuracy
 
     st.set_page_config(
      page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
@@ -171,7 +171,7 @@ def showGUI(dum_df, dataset, products):
      'Widoczne naczynka'))
 
     form.subheader('Czy jeszcze z czymś się zmagasz?')        
-    mainProblem = form.radio(
+    secondProblem = form.radio(
      "",
      ('Nie mam więcej problemów z cerą',
      'Nadprodukcja sebum', 
@@ -183,8 +183,8 @@ def showGUI(dum_df, dataset, products):
      'Szara cera',
      'Widoczne naczynka'))
 
-    if mainProblem == 'Nie mam więcej problemów z cerą':
-        mainProblem = 'Brak'
+    if secondProblem == 'Nie mam więcej problemów z cerą':
+        secondProblem = 'Brak'
     
     form.subheader('Ile masz lat?')
     age = form.slider("", 16, 60)
@@ -194,7 +194,7 @@ def showGUI(dum_df, dataset, products):
         
         my_dataframe = {'Typ cery': skinType,
                     'Główny problem': mainProblem,
-                    'Poboczny problem': mainProblem,
+                    'Poboczny problem': secondProblem,
                     'Wrażliwa': isSensitive,
                     'Wiek': age}
         df = pd.DataFrame.from_dict([my_dataframe])
