@@ -137,6 +137,7 @@ def showGUI(dum_df, dataset, products):
     st.set_page_config(
      page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
      menu_items={
+        'Report a bug': "https://forms.gle/5KV7rdhNi8epigL26"
          'About': "# Praca inżynierska. *s20943*"
         }
     )
@@ -232,7 +233,7 @@ def showGUI(dum_df, dataset, products):
         st.subheader('Peeling')
         setPhoto('Peeling', 'left')
 
-        devClicked = st.button("Strefa dewelopera")
+        # devClicked = st.button("Strefa dewelopera")
         # if devClicked:
         #     #open("dev_page.py")
         df = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
