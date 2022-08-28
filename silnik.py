@@ -41,27 +41,47 @@ def clearText(text):
 def makeSingleProblemTree(problemName, dum_df, dataset):
     problemIndex = 0
     global graphCounter, accuracy
-    match problemName:
-        case 'Mycie':
-            problemIndex = 6
-        case 'Serum na dzień':
-            problemIndex = 7
-        case 'Krem na dzień':
-            problemIndex = 8
-        case 'SPF' :
-            problemIndex = 9
-        case 'Serum na noc':
-            problemIndex = 10
-        case 'Krem na noc':
-            problemIndex = 11
-        case 'Punktowo':
-            problemIndex = 12
-        case 'Maseczka':
-            problemIndex = 13
-        case 'Peeling':
-            problemIndex = 14
-        case _:        
-            print('Error')
+    # match problemName:
+    #     case 'Mycie':
+    #         problemIndex = 6
+    #     case 'Serum na dzień':
+    #         problemIndex = 7
+    #     case 'Krem na dzień':
+    #         problemIndex = 8
+    #     case 'SPF' :
+    #         problemIndex = 9
+    #     case 'Serum na noc':
+    #         problemIndex = 10
+    #     case 'Krem na noc':
+    #         problemIndex = 11
+    #     case 'Punktowo':
+    #         problemIndex = 12
+    #     case 'Maseczka':
+    #         problemIndex = 13
+    #     case 'Peeling':
+    #         problemIndex = 14
+    #     case _:        
+    #         print('Error')
+
+    if(problemName == 'Mycie'):
+        problemIndex = 6
+    if(problemName == 'Serum na dzień'):
+        problemIndex = 7
+    if(problemName == 'Krem na dzień'):
+        problemIndex = 8
+    if(problemName == 'SPF'):
+        problemIndex = 9
+    if(problemName ==  'Serum na noc'):
+        problemIndex = 10
+    if(problemName ==  'Krem na noc'):
+        problemIndex = 11
+    if(problemName ==  'Punktowo'):
+        problemIndex = 12
+    if(problemName ==  'Maseczka'):
+        problemIndex = 13
+    if(problemName ==  'Peeling'):
+        problemIndex = 14
+
     X = dum_df.values[:, 1:6]
     Y_problem = dataset.values[:, problemIndex]
     X_train, X_test, y_train, y_test = train_test_split(X, Y_problem, test_size = 0.25, random_state = 100)
