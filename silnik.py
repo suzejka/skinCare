@@ -6,6 +6,9 @@ from sklearn.tree import DecisionTreeClassifier
 import time
 import streamlit as st
 
+import warnings 
+warnings.filterwarnings("ignore")
+
 graphCounter = 1
 
 encoder = None
