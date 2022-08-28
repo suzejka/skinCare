@@ -240,7 +240,7 @@ def showGUI(dum_df, dataset, products):
 
 def main():
     global products
-    products = pd.read_csv("products.csv", sep=';')
+    products = pd.read_csv("products_2.csv", sep=';')
     products = products.to_dict()
     dataset = pd.read_csv("daneSkinCare.csv", sep=';')
     dataset = dataset.loc[:, ~dataset.columns.str.contains('^Unnamed')]
