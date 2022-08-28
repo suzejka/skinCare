@@ -230,11 +230,11 @@ def showGUI(dum_df, dataset, products):
         setPhoto('Peeling', 'left')
 
         devClicked = st.button("Strefa dewelopera")
-        #if devClicked:
+        if devClicked:
             #open("dev_page.py")
-        df = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
+            df = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
          
-        st.dataframe(data=df)
+            st.dataframe(data=df)
 
         st.stop()
 
