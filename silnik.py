@@ -1,3 +1,4 @@
+from pickle import FALSE
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
@@ -31,7 +32,7 @@ allColumns = askedColumnNames + decisionColumnNames
 allCategoricalColumns = categoricalColumnNames + decisionColumnNames
 
 def clearText(text):
-    text = str(text).replace("'","").replace("[","").replace("]","")
+    text = str(text).replace("'","").replace("[","").replace("]","").replace("\\xa0", " ")
     return text
 
 def makeSingleProblemTree(problemName, dumDf, dataset):
@@ -61,7 +62,7 @@ def makeSingleProblemTree(problemName, dumDf, dataset):
     X = dumDf.values[:, 1:6]
     Y_problem = dataset.values[:, problemIndex]
     X_train, X_test, y_train, y_test = train_test_split(X, Y_problem, test_size = 0.25, random_state = 100)
-    model = DecisionTreeClassifier(max_depth=10)
+    model = DecisionTreeClassifier(max_depth=16)
     model = model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
     accuracy[problemName] = str(accuracy_score(y_test, y_pred)*100) # "{} - Accuracy : {}".format(problem_name,accuracy_score(y_test, y_pred)*100)
@@ -101,11 +102,14 @@ def setPhoto(category, side):
     global products
     if side == 'left':
         link = str(resultSkinCare.get(category))
+        print("----------------------- link" + link)
         value = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
+        print("----------------------- val1" + value)
         if value != "0": 
             col1, col2, = st.columns([1,3])
             with col1:
                 if value != "0":
+                    print("----------------------- val" + value)
                     st.image(value, width=150)
             with col2:
                 st.markdown("")
@@ -127,6 +131,7 @@ def setPhoto(category, side):
                 st.markdown("")
                 st.markdown(clearText(resultSkinCare.get(category)))
             with col2:
+                print("-----------------------" + value)
                 st.image(value, width=150)
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
@@ -240,7 +245,8 @@ def showGUI(dum_df, dataset, products):
          
         #     st.dataframe(data=df)
 
-        print(df)
+        for i in df:
+            print(df[i].to_string(index = False))
 
         st.stop()
 
