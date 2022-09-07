@@ -98,7 +98,7 @@ def createLabelEncoding(datasetToEncode):
     return datasetToEncode
 
 def setPhoto(category, side):
-    global products
+    global products        
     if side == 'left':
         link = str(resultSkinCare.get(category))
         print("----------------------- link" + link)
@@ -108,7 +108,10 @@ def setPhoto(category, side):
             with col1:
                 if value != "0":
                     print("----------------------- val" + value)
-                    st.image(value, width=150)
+                    try:
+                        st.image(value, width=150)
+                    except ValueError:
+                        st.error("Error")
             with col2:
                 st.markdown("")
                 st.markdown("")
@@ -132,9 +135,13 @@ def setPhoto(category, side):
                 st.markdown(clearText(resultSkinCare.get(category)))
             with col2:
                 print("-----------------------" + value)
-                st.image(value, width=150)
+                try:
+                    st.image(value, width=150)
+                except ValueError:
+                    st.error("Error")
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
+           
 
 def showGUI(dum_df, dataset, products):
     global skinType, isSensitive, mainProblem, secondProblem, age, accuracy
@@ -201,54 +208,54 @@ def showGUI(dum_df, dataset, products):
     clicked = form.form_submit_button("Wyślij")
     if clicked:
         
-        my_dataframe = {'Typ cery': skinType,
-                    'Główny problem': mainProblem,
-                    'Poboczny problem': secondProblem,
-                    'Wrażliwa': isSensitive,
-                    'Wiek': age}
-        df = pd.DataFrame.from_dict([my_dataframe])
-        for i in decisionColumnNames:
-            problemModel = makeSingleProblemTree(i, dum_df, dataset)
-            result = predictMyObject(problemModel, df, i)
-            #print(i, " - " ,result)
-            resultSkinCare[i] = result
+            my_dataframe = {'Typ cery': skinType,
+                        'Główny problem': mainProblem,
+                        'Poboczny problem': secondProblem,
+                        'Wrażliwa': isSensitive,
+                        'Wiek': age}
+            df = pd.DataFrame.from_dict([my_dataframe])
+            for i in decisionColumnNames:
+                problemModel = makeSingleProblemTree(i, dum_df, dataset)
+                result = predictMyObject(problemModel, df, i)
+                #print(i, " - " ,result)
+                resultSkinCare[i] = result
 
-        st.session_state.accuracy = df
-        with st.spinner('Tworzę Twój plan pielęgnacyjny...'):
-            time.sleep(4)
-        st.success('Skończone!')
-   
-        st.header('Proponowana pielęgnacja')
-        st.subheader('Mycie')
-        setPhoto('Mycie', 'left')
-        st.subheader('Serum na dzień')
-        setPhoto('Serum na dzień', 'right')
-        st.subheader('Krem na dzień')
-        setPhoto('Krem na dzień', 'left')
-        st.subheader('Krem przeciwsłoneczny')
-        setPhoto('SPF', 'right')
-        st.subheader('Serum na noc')
-        setPhoto('Serum na noc', 'left')
-        st.subheader('Krem na noc')
-        setPhoto('Krem na noc', 'right')
-        st.subheader('Punktowo')
-        setPhoto('Punktowo', 'left')
-        st.subheader('Maseczka')
-        setPhoto('Maseczka', 'right')
-        st.subheader('Peeling')
-        setPhoto('Peeling', 'left')
+            st.session_state.accuracy = df
+            with st.spinner('Tworzę Twój plan pielęgnacyjny...'):
+                time.sleep(4)
+            st.success('Skończone!')
+    
+            st.header('Proponowana pielęgnacja')
+            st.subheader('Mycie')
+            setPhoto('Mycie', 'left')
+            st.subheader('Serum na dzień')
+            setPhoto('Serum na dzień', 'right')
+            st.subheader('Krem na dzień')
+            setPhoto('Krem na dzień', 'left')
+            st.subheader('Krem przeciwsłoneczny')
+            setPhoto('SPF', 'right')
+            st.subheader('Serum na noc')
+            setPhoto('Serum na noc', 'left')
+            st.subheader('Krem na noc')
+            setPhoto('Krem na noc', 'right')
+            st.subheader('Punktowo')
+            setPhoto('Punktowo', 'left')
+            st.subheader('Maseczka')
+            setPhoto('Maseczka', 'right')
+            st.subheader('Peeling')
+            setPhoto('Peeling', 'left')
 
-        # devClicked = st.button("Strefa dewelopera")
-        # if devClicked:
-        #     #open("dev_page.py")
-        df = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
-         
-        #     st.dataframe(data=df)
+            # devClicked = st.button("Strefa dewelopera")
+            # if devClicked:
+            #     #open("dev_page.py")
+            df = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
+            
+            #     st.dataframe(data=df)
 
-        for i in df:
-            print(df[i].to_string(index = False))
+            for i in df:
+                print(df[i].to_string(index = False))
 
-        st.stop()
+            st.stop()
 
 def main():
     global products
