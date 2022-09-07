@@ -6,7 +6,6 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
 import time
 import streamlit as st
-
 import warnings 
 warnings.filterwarnings("ignore")
 
@@ -104,7 +103,6 @@ def setPhoto(category, side):
         link = str(resultSkinCare.get(category))
         print("----------------------- link" + link)
         value = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
-        print("----------------------- val1" + value)
         if value != "0": 
             col1, col2, = st.columns([1,3])
             with col1:
@@ -121,8 +119,10 @@ def setPhoto(category, side):
             st.markdown(clearText(resultSkinCare.get(category)))
     else:
         link = str(resultSkinCare.get(category))
+        print("----------------------- link" + link)
         value = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
         if value != "0": 
+            print("----------------------- val" + value)
             col1, col2, = st.columns([3,1])
             with col1:
                 st.markdown("")
