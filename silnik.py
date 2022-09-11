@@ -123,11 +123,7 @@ def setPhoto(category, side):
             col1, col2, = st.columns([1,3])
             with col1:
                 if value != "0":
-                    try:
-                        st.image(value, width=150)
-                    except:
-                        st.error("Wystąpił błąd! Proszę spróbować później.")
-                        send_message(chatId, "Błąd podczas wyświetlania zdjęcia " + value)
+                    st.image(value, width=150)
             with col2:
                 st.markdown("")
                 st.markdown("")
