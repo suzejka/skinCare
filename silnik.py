@@ -39,7 +39,7 @@ def send_message(chatId, message):
     requests.get(url)
 
 def createMessage(inputData, message):
-
+    result = ""
     for i in range(len(inputData.columns)):
         result += inputData.columns[i] + inputData[i] + "\n"    
     result += message
