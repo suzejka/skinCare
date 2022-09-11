@@ -164,9 +164,15 @@ def showGUI(dum_df, dataset, products):
      menu_items={
         'Report a bug': "https://forms.gle/5KV7rdhNi8epigL26",
         'About': "# Praca inżynierska. *s20943*"
-        }
+        },
+    page_icon="skincareIcon.png"
     )
-    st.title("System rekomendacyjny, do tworzenia planów pielęgnacyjnych")
+
+    col1, col2, = st.columns([1,3])
+    with col1:
+        st.image("skincareIcon.png", width=120)
+    with col2:
+        st.title("Kreator planów pielęgnacyjnych")
 
     form = st.form("my_form")
     form.subheader('Jaki masz typ cery?')
