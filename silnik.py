@@ -213,6 +213,7 @@ def showGUI(dum_df, dataset, products):
                         'Poboczny problem': secondProblem,
                         'Wrażliwa': isSensitive,
                         'Wiek': age}
+            print(my_dataframe)
             df = pd.DataFrame.from_dict([my_dataframe])
             for i in decisionColumnNames:
                 problemModel = makeSingleProblemTree(i, dum_df, dataset)
