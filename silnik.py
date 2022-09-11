@@ -261,6 +261,9 @@ def showGUI(dum_df, dataset, products):
                     + "\nLink - " + str(link) 
                     + "\nProdukt - " + str(chosenProduct)))
             helpMessage = "1. Przedstawione produkty to tylko i wyłącznie PROPOZYCJA pielęgnacji! Użycie programu nie zastąpi wizyty u specjalisty!\n2. Jeżeli zaproponowana maseczka składa się z dwóch produktów, oznacza to, że na początku należy nałożyć pierwszy produkt i następnie (bez zmywania) nałożyć maseczkę. W przypadku kwasu salicylowego, należy odczekać 15/20 minut przed nałożeniem maseczki. \n3. Jeżeli proponowana maseczka zawiera w sobie glinkę, należy pamiętać, że glinka nigdy nie powinna zasychać, dlatego warto dodać do maseczki kilka kropel ulubionego oleju kosmetycznego lub nałożoną maseczkę zwilżać poprzez spryskiwanie twarzy wodą."
+            st.caption("")
+            st.caption("")
+            st.caption("")
             st.caption(helpMessage)
             # devClicked = st.button("Strefa dewelopera")
             # if devClicked:
