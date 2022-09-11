@@ -79,7 +79,7 @@ def predictMyObject(model, my_object, columnName):
         labelsDescription = labelsDescription.tolist()
         for l in labelsDescription:
             if my_object[i].item() == l:
-                print("Klasa - ", my_object[i].item(), "Label -> ", labelsDescription.index(l))
+                #print("Klasa - ", my_object[i].item(), "Label -> ", labelsDescription.index(l))
                 my_object[i] = labelsDescription.index(l)
         # my_object[i] = np.where(labelsDescription == my_object[i])
     prediction = model.predict(my_object)
@@ -101,17 +101,17 @@ def setPhoto(category, side):
     global products        
     if side == 'left':
         link = str(resultSkinCare.get(category))
-        print("----------------------- link" + link)
+        #print("----------------------- link" + link)
         value = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
         if value != "0": 
             col1, col2, = st.columns([1,3])
             with col1:
                 if value != "0":
-                    print("----------------------- val" + value)
+                    #print("----------------------- val" + value)
                     try:
                         st.image(value, width=150)
-                    except ValueError:
-                        st.error("Error")
+                    except:
+                        st.error("Błąd")
             with col2:
                 st.markdown("")
                 st.markdown("")
@@ -122,10 +122,10 @@ def setPhoto(category, side):
             st.markdown(clearText(resultSkinCare.get(category)))
     else:
         link = str(resultSkinCare.get(category))
-        print("----------------------- link" + link)
+        #print("----------------------- link" + link)
         value = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
         if value != "0": 
-            print("----------------------- val" + value)
+            #print("----------------------- val" + value)
             col1, col2, = st.columns([3,1])
             with col1:
                 st.markdown("")
@@ -134,11 +134,11 @@ def setPhoto(category, side):
                 st.markdown("")
                 st.markdown(clearText(resultSkinCare.get(category)))
             with col2:
-                print("-----------------------" + value)
+                #print("-----------------------" + value)
                 try:
                     st.image(value, width=150)
-                except ValueError:
-                    st.error("Error")
+                except:
+                    st.error("Błąd")
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
            
@@ -280,8 +280,8 @@ def showGUI(dum_df, dataset, products):
             
             #     st.dataframe(data=df)
 
-            for i in df:
-                print(df[i].to_string(index = False))
+            #for i in df:
+            #   print(df[i].to_string(index = False))
 
             st.stop()
 
