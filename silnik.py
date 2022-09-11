@@ -227,23 +227,50 @@ def showGUI(dum_df, dataset, products):
     
             st.header('Proponowana pielęgnacja')
             st.subheader('Mycie')
-            setPhoto('Mycie', 'left')
+            try:
+                setPhoto('Mycie', 'left')
+            except:
+                st.error("Błąd")
             st.subheader('Serum na dzień')
-            setPhoto('Serum na dzień', 'right')
+            try:
+                setPhoto('Serum na dzień', 'right')
+            except:
+                st.error("Błąd")
             st.subheader('Krem na dzień')
-            setPhoto('Krem na dzień', 'left')
+            try:
+                setPhoto('Krem na dzień', 'left')
+            except:
+                st.error("Błąd")
             st.subheader('Krem przeciwsłoneczny')
-            setPhoto('SPF', 'right')
+            try:
+                setPhoto('SPF', 'right')
+            except:
+                st.error("Błąd")
             st.subheader('Serum na noc')
-            setPhoto('Serum na noc', 'left')
+            try:
+                setPhoto('Serum na noc', 'left')
+            except:
+                st.error("Błąd")
             st.subheader('Krem na noc')
-            setPhoto('Krem na noc', 'right')
+            try:
+                setPhoto('Krem na noc', 'right')
+            except:
+                st.error("Błąd")
             st.subheader('Punktowo')
-            setPhoto('Punktowo', 'left')
+            try:
+                setPhoto('Punktowo', 'left')
+            except:
+                st.error("Błąd")
             st.subheader('Maseczka')
-            setPhoto('Maseczka', 'right')
+            try:
+                setPhoto('Maseczka', 'right')
+            except:
+                st.error("Błąd")
             st.subheader('Peeling')
-            setPhoto('Peeling', 'left')
+            try:
+                setPhoto('Peeling', 'left')
+            except:
+                st.error("Błąd")
 
             # devClicked = st.button("Strefa dewelopera")
             # if devClicked:
