@@ -239,8 +239,8 @@ def showGUI(dum_df, dataset, products):
             st.success('Skończone!')
     
             st.header('Proponowana pielęgnacja')
+            counter = 0
             for name in decisionColumnNames:
-                counter = 0
                 st.subheader(name)
                 try:
                     side = 'right'
