@@ -24,6 +24,8 @@ resultSkinCare = {}
 models = []
 accuracy = {}
 products = {}
+link = None
+chosenProduct = None
 
 botToken = '5660046213:AAHCSDYbdW7E5rc5MnoL1n8QCY-Qh8M1ZgI'
 chatId = '5303880405'
@@ -38,12 +40,10 @@ def send_message(chatId, message):
     url = f"https://api.telegram.org/bot{botToken}/sendMessage?chat_id={chatId}&text={message}"
     requests.get(url)
 
-def createMessage(inputData, message):
-    result = ''
-    for i in inputData.columns:
-        result += str(i) + str(inputData[i]) + '\n' 
-    result += message
-
+def createMessage(inputDict, message):
+    result = message + '\n'
+    for i in inputDict.keys():
+        result += str(i) + ": " + str(inputDict[i]) + '\n'
     return result
 
 def clearText(text):
@@ -114,16 +114,16 @@ def createLabelEncoding(datasetToEncode):
     return datasetToEncode
 
 def setPhoto(category, side):
-    global products        
+    global products, link, chosenProduct
     if side == 'left':
         link = str(resultSkinCare.get(category))
         #print("----------------------- link" + link)
-        value = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
-        if value != "0": 
+        chosenProduct = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
+        if chosenProduct != "0": 
             col1, col2, = st.columns([1,3])
             with col1:
-                if value != "0":
-                    st.image(value, width=150)
+                if chosenProduct != "0":
+                    st.image(chosenProduct, width=150)
             with col2:
                 st.markdown("")
                 st.markdown("")
@@ -135,8 +135,8 @@ def setPhoto(category, side):
     else:
         link = str(resultSkinCare.get(category))
         #print("----------------------- link" + link)
-        value = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
-        if value != "0": 
+        chosenProduct = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
+        if chosenProduct != "0": 
             #print("----------------------- val" + value)
             col1, col2, = st.columns([3,1])
             with col1:
@@ -148,16 +148,16 @@ def setPhoto(category, side):
             with col2:
                 #print("-----------------------" + value)
                 try:
-                    st.image(value, width=150)
+                    st.image(chosenProduct, width=150)
                 except:
                     st.error("Wystąpił błąd! Proszę spróbować później.")
-                    send_message(chatId, "Błąd podczas wyświetlania zdjęcia " + value)
+                    send_message(chatId, "Błąd podczas wyświetlania zdjęcia " + chosenProduct)
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
            
 
 def showGUI(dum_df, dataset, products):
-    global skinType, isSensitive, mainProblem, secondProblem, age, accuracy
+    global skinType, isSensitive, mainProblem, secondProblem, age, accuracy, link, chosenProduct
 
     st.set_page_config(
      page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
@@ -228,11 +228,9 @@ def showGUI(dum_df, dataset, products):
                         'Wiek': age}
             
             df = pd.DataFrame.from_dict([myDataframe])
-            dataToSend = df
             for i in decisionColumnNames:
                 problemModel = makeSingleProblemTree(i, dum_df, dataset)
                 result = predictMyObject(problemModel, df, i)
-                #print(i, " - " ,result)
                 resultSkinCare[i] = result
 
             st.session_state.accuracy = df
@@ -241,60 +239,20 @@ def showGUI(dum_df, dataset, products):
             st.success('Skończone!')
     
             st.header('Proponowana pielęgnacja')
-            st.subheader('Mycie')
-            try:
-                setPhoto('Mycie', 'left')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu do mycia"))
-            st.subheader('Serum na dzień')
-            try:
-                setPhoto('Serum na dzień', 'right')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu serum na dzień"))
-            st.subheader('Krem na dzień')
-            try:
-                setPhoto('Krem na dzień', 'left')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu krem na dzień"))
-            st.subheader('Krem przeciwsłoneczny')
-            try:
-                setPhoto('SPF', 'right')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu SPF"))
-            st.subheader('Serum na noc')
-            try:
-                setPhoto('Serum na noc', 'left')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu serum na noc"))
-            st.subheader('Krem na noc')
-            try:
-                setPhoto('Krem na noc', 'right')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu krem na noc"))
-            st.subheader('Punktowo')
-            try:
-                setPhoto('Punktowo', 'left')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu punktowego"))
-            st.subheader('Maseczka')
-            try:
-                setPhoto('Maseczka', 'right')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu maseczka"))
-            st.subheader('Peeling')
-            try:
-                setPhoto('Peeling', 'left')
-            except:
-                st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu peeling"))
+            for name in decisionColumnNames:
+                counter = 0
+                st.subheader(name)
+                try:
+                    side = 'right'
+                    if(counter % 2 == 0):
+                        side = 'left'
+                    setPhoto(name, side)
+                    counter += 1
+                except:
+                    st.error("Wystąpił błąd! Proszę spróbować później.")
+                    send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu - " + name 
+                    + "\nLink - " + str(link) 
+                    + "\nProdukt - " + str(chosenProduct)))
 
             # devClicked = st.button("Strefa dewelopera")
             # if devClicked:
