@@ -7,6 +7,7 @@ from sklearn.tree import DecisionTreeClassifier
 import time
 import streamlit as st
 import warnings 
+import requests
 warnings.filterwarnings("ignore")
 
 graphCounter = 1
@@ -24,11 +25,26 @@ models = []
 accuracy = {}
 products = {}
 
+botToken = '5660046213:AAHCSDYbdW7E5rc5MnoL1n8QCY-Qh8M1ZgI'
+chatId = '5303880405'
+
 askedColumnNames = ['Typ cery', 'Główny problem', 'Poboczny problem', 'Wrażliwa','Wiek']
 categoricalColumnNames = ['Typ cery', 'Główny problem', 'Poboczny problem']
 decisionColumnNames = ['Mycie','Serum na dzień','Krem na dzień','SPF','Serum na noc','Krem na noc','Punktowo','Maseczka','Peeling']
 allColumns = askedColumnNames + decisionColumnNames
 allCategoricalColumns = categoricalColumnNames + decisionColumnNames
+
+def send_message(chatId, message):
+    url = f"https://api.telegram.org/bot{botToken}/sendMessage?chat_id={chatId}&text={message}"
+    requests.get(url)
+
+def createMessage(inputData, message):
+
+    for i in len(inputData.columns):
+        result += inputData.columns[i] + inputData[i] + "\n"    
+    result += message
+
+    return result
 
 def clearText(text):
     text = str(text).replace("'","").replace("[","").replace("]","").replace("\\xa0", " ")
@@ -107,11 +123,11 @@ def setPhoto(category, side):
             col1, col2, = st.columns([1,3])
             with col1:
                 if value != "0":
-                    #print("----------------------- val" + value)
                     try:
                         st.image(value, width=150)
                     except:
-                        st.error("Błąd")
+                        st.error("Wystąpił błąd! Proszę spróbować później.")
+                        send_message(chatId, "Błąd podczas wyświetlania zdjęcia " + value)
             with col2:
                 st.markdown("")
                 st.markdown("")
@@ -138,7 +154,8 @@ def setPhoto(category, side):
                 try:
                     st.image(value, width=150)
                 except:
-                    st.error("Błąd")
+                    st.error("Wystąpił błąd! Proszę spróbować później.")
+                    send_message(chatId, "Błąd podczas wyświetlania zdjęcia " + value)
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
            
@@ -208,13 +225,13 @@ def showGUI(dum_df, dataset, products):
     clicked = form.form_submit_button("Wyślij")
     if clicked:
         
-            my_dataframe = {'Typ cery': skinType,
+            myDataframe = {'Typ cery': skinType,
                         'Główny problem': mainProblem,
                         'Poboczny problem': secondProblem,
                         'Wrażliwa': isSensitive,
                         'Wiek': age}
-            print(my_dataframe)
-            df = pd.DataFrame.from_dict([my_dataframe])
+            
+            df = pd.DataFrame.from_dict([myDataframe])
             for i in decisionColumnNames:
                 problemModel = makeSingleProblemTree(i, dum_df, dataset)
                 result = predictMyObject(problemModel, df, i)
@@ -231,47 +248,56 @@ def showGUI(dum_df, dataset, products):
             try:
                 setPhoto('Mycie', 'left')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu do mycia"))
             st.subheader('Serum na dzień')
             try:
                 setPhoto('Serum na dzień', 'right')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu serum na dzień"))
             st.subheader('Krem na dzień')
             try:
                 setPhoto('Krem na dzień', 'left')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu krem na dzień"))
             st.subheader('Krem przeciwsłoneczny')
             try:
                 setPhoto('SPF', 'right')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu SPF"))
             st.subheader('Serum na noc')
             try:
                 setPhoto('Serum na noc', 'left')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu serum na noc"))
             st.subheader('Krem na noc')
             try:
                 setPhoto('Krem na noc', 'right')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu krem na noc"))
             st.subheader('Punktowo')
             try:
                 setPhoto('Punktowo', 'left')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu punktowego"))
             st.subheader('Maseczka')
             try:
                 setPhoto('Maseczka', 'right')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu maseczka"))
             st.subheader('Peeling')
             try:
                 setPhoto('Peeling', 'left')
             except:
-                st.error("Błąd")
+                st.error("Wystąpił błąd! Proszę spróbować później.")
+                send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu peeling"))
 
             # devClicked = st.button("Strefa dewelopera")
             # if devClicked:
