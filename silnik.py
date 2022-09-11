@@ -228,6 +228,7 @@ def showGUI(dum_df, dataset, products):
                         'Wiek': age}
             
             df = pd.DataFrame.from_dict([myDataframe])
+            dataToSend = df
             for i in decisionColumnNames:
                 problemModel = makeSingleProblemTree(i, dum_df, dataset)
                 result = predictMyObject(problemModel, df, i)
@@ -245,55 +246,55 @@ def showGUI(dum_df, dataset, products):
                 setPhoto('Mycie', 'left')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu do mycia"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu do mycia"))
             st.subheader('Serum na dzień')
             try:
                 setPhoto('Serum na dzień', 'right')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu serum na dzień"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu serum na dzień"))
             st.subheader('Krem na dzień')
             try:
                 setPhoto('Krem na dzień', 'left')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu krem na dzień"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu krem na dzień"))
             st.subheader('Krem przeciwsłoneczny')
             try:
                 setPhoto('SPF', 'right')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu SPF"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu SPF"))
             st.subheader('Serum na noc')
             try:
                 setPhoto('Serum na noc', 'left')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu serum na noc"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu serum na noc"))
             st.subheader('Krem na noc')
             try:
                 setPhoto('Krem na noc', 'right')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu krem na noc"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu krem na noc"))
             st.subheader('Punktowo')
             try:
                 setPhoto('Punktowo', 'left')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu punktowego"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu punktowego"))
             st.subheader('Maseczka')
             try:
                 setPhoto('Maseczka', 'right')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu maseczka"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu maseczka"))
             st.subheader('Peeling')
             try:
                 setPhoto('Peeling', 'left')
             except:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
-                send_message(chatId, createMessage(df, "Błąd podczas wyświetlania produktu peeling"))
+                send_message(chatId, createMessage(dataToSend, "Błąd podczas wyświetlania produktu peeling"))
 
             # devClicked = st.button("Strefa dewelopera")
             # if devClicked:
