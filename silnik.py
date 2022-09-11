@@ -157,7 +157,7 @@ def setPhoto(category, side):
            
 
 def showGUI(dum_df, dataset, products):
-    global skinType, isSensitive, mainProblem, secondProblem, age, accuracy, link, chosenProduct
+    global skinType, isSensitive, mainProblem, secondProblem, age, accuracy, link, chosenProduct   
 
     st.set_page_config(
      page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
@@ -166,6 +166,7 @@ def showGUI(dum_df, dataset, products):
         'About': "# Praca inżynierska. *s20943*"
         }
     )
+    st.title("System rekomendacyjny, do tworzenia planów pielęgnacyjnych")
 
     form = st.form("my_form")
     form.subheader('Jaki masz typ cery?')
@@ -253,7 +254,8 @@ def showGUI(dum_df, dataset, products):
                     send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu - " + name 
                     + "\nLink - " + str(link) 
                     + "\nProdukt - " + str(chosenProduct)))
-
+            helpMessage = "1. Przedstawione produkty to tylko i wyłącznie PROPOZYCJA pielęgnacji! Użycie programu nie zastąpi wizyty u specjalisty!\n2. Jeżeli zaproponowana maseczka składa się z dwóch produktów, oznacza to, że na początku należy nałożyć pierwszy produkt i następnie (bez zmywania) nałożyć maseczkę. W przypadku kwasu salicylowego, należy odczekać 15/20 minut przed nałożeniem maseczki. \n3. Jeżeli proponowana maseczka zawiera w sobie glinkę, należy pamiętać, że glinka nigdy nie powinna zasychać, dlatego warto dodać do maseczki kilka kropel ulubionego oleju kosmetycznego lub nałożoną maseczkę zwilżać poprzez spryskiwanie twarzy wodą."
+            st.caption(helpMessage)
             # devClicked = st.button("Strefa dewelopera")
             # if devClicked:
             #     #open("dev_page.py")
