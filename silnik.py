@@ -40,8 +40,8 @@ def send_message(chatId, message):
 
 def createMessage(inputData, message):
     result = ""
-    for i in range(len(inputData.columns)):
-        result += inputData.columns[i] + inputData[i] + "\n"    
+    for i in inputData.columns:
+        result += i + inputData[i] + "\n"    
     result += message
 
     return result
