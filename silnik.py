@@ -28,7 +28,6 @@ link = None
 chosenProduct = None
 
 botToken = '5660046213:AAHCSDYbdW7E5rc5MnoL1n8QCY-Qh8M1ZgI'
-chatId = '5303880405'
 
 askedColumnNames = ['Typ cery', 'Główny problem', 'Poboczny problem', 'Wrażliwa','Wiek']
 categoricalColumnNames = ['Typ cery', 'Główny problem', 'Poboczny problem']
@@ -36,7 +35,8 @@ decisionColumnNames = ['Mycie','Serum na dzień','Krem na dzień','SPF','Serum n
 allColumns = askedColumnNames + decisionColumnNames
 allCategoricalColumns = categoricalColumnNames + decisionColumnNames
 
-def send_message(chatId, message):
+def send_message(message):
+    chatId = '5303880405'
     url = f"https://api.telegram.org/bot{botToken}/sendMessage?chat_id={chatId}&text={message}"
     requests.get(url)
 
@@ -151,7 +151,7 @@ def setPhoto(category, side):
                     st.image(chosenProduct, width=150)
                 except:
                     st.error("Wystąpił błąd! Proszę spróbować później.")
-                    send_message(chatId, "Błąd podczas wyświetlania zdjęcia " + chosenProduct)
+                    send_message("Błąd podczas wyświetlania zdjęcia " + chosenProduct)
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
            
@@ -257,9 +257,10 @@ def showGUI(dum_df, dataset, products):
                     counter += 1
                 except:
                     st.error("Wystąpił błąd! Proszę spróbować później.")
-                    send_message(chatId, createMessage(myDataframe, "Błąd podczas wyświetlania produktu - " + name 
+                    send_message(createMessage(myDataframe, "Błąd podczas wyświetlania produktu - " + name 
                     + "\nLink - " + str(link) 
-                    + "\nProdukt - " + str(chosenProduct)))
+                    + "\nProdukt - " + str(chosenProduct))
+                    )
             helpMessage = "1. Przedstawione produkty to tylko i wyłącznie PROPOZYCJA pielęgnacji! Użycie programu nie zastąpi wizyty u specjalisty!\n2. Jeżeli zaproponowana maseczka składa się z dwóch produktów, oznacza to, że na początku należy nałożyć pierwszy produkt i następnie (bez zmywania) nałożyć maseczkę. W przypadku kwasu salicylowego, należy odczekać 15/20 minut przed nałożeniem maseczki. \n3. Jeżeli proponowana maseczka zawiera w sobie glinkę, należy pamiętać, że glinka nigdy nie powinna zasychać, dlatego warto dodać do maseczki kilka kropel ulubionego oleju kosmetycznego lub nałożoną maseczkę zwilżać poprzez spryskiwanie twarzy wodą."
             st.caption("")
             st.caption("")
