@@ -223,7 +223,7 @@ def showGUI(dum_df, dataset, products):
         secondProblem = 'Brak'
     
     form.subheader('Ile masz lat?')
-    age = form.slider("", 16, 60)
+    age = form.slider("", 16, 100)
         
     clicked = form.form_submit_button("Wyślij")
     if clicked:
