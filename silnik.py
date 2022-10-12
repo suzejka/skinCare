@@ -10,8 +10,6 @@ import warnings
 import requests
 warnings.filterwarnings("ignore")
 
-graphCounter = 1
-
 encoder = None
 encoders = {}
 labelsDescription = {}
@@ -27,16 +25,15 @@ products = {}
 link = None
 chosenProduct = None
 
-botToken = '5660046213:AAHCSDYbdW7E5rc5MnoL1n8QCY-Qh8M1ZgI'
-
 askedColumnNames = ['Typ cery', 'Główny problem', 'Poboczny problem', 'Wrażliwa','Wiek']
 categoricalColumnNames = ['Typ cery', 'Główny problem', 'Poboczny problem']
 decisionColumnNames = ['Mycie','Serum na dzień','Krem na dzień','SPF','Serum na noc','Krem na noc','Punktowo','Maseczka','Peeling']
 allColumns = askedColumnNames + decisionColumnNames
 allCategoricalColumns = categoricalColumnNames + decisionColumnNames
 
-def send_message(message):
+def sendToTelegram(message):
     chatId = '5303880405'
+    botToken = '5660046213:AAHCSDYbdW7E5rc5MnoL1n8QCY-Qh8M1ZgI'
     url = f"https://api.telegram.org/bot{botToken}/sendMessage?chat_id={chatId}&text={message}"
     requests.get(url)
 
@@ -52,7 +49,7 @@ def clearText(text):
 
 def makeSingleProblemTree(problemName, dumDf, dataset):
     problemIndex = 0
-    global graphCounter, accuracy
+    global accuracy
     match problemName:
         case 'Mycie':
             problemIndex = 6
@@ -72,44 +69,41 @@ def makeSingleProblemTree(problemName, dumDf, dataset):
             problemIndex = 13
         case 'Peeling':
             problemIndex = 14
-        case _:        
-            print('Error')
+        case _:   
+            sendToTelegram("Błąd! Nie rozpoznano kategorii produktu.")
+            raise ValueError("Nie rozpoznano kategorii produktu.")
+
     X = dumDf.values[:, 1:6]
-    Y_problem = dataset.values[:, problemIndex]
-    X_train, X_test, y_train, y_test = train_test_split(X, Y_problem, test_size = 0.25, random_state = 100)
+    yProblem = dataset.values[:, problemIndex]
+    X_train, X_test, y_train, y_test = train_test_split(X, yProblem, test_size = 0.25, random_state = 100)
     model = DecisionTreeClassifier(max_depth=16)
     model = model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    accuracy[problemName] = str(accuracy_score(y_test, y_pred)*100) # "{} - Accuracy : {}".format(problem_name,accuracy_score(y_test, y_pred)*100)
-    
-    unique_values = dataset[problemName].unique()
-    
-    graphCounter = graphCounter + 1
+    yPrediction = model.predict(X_test)
+    accuracy[problemName] = str(accuracy_score(y_test, yPrediction)*100) # "{} - Accuracy : {}".format(problem_name,accuracy_score(y_test, y_pred)*100)
+   
     return model
 
-def predictMyObject(model, my_object, columnName):
+def predictMyObject(model, objectToPredict, columnName):
     global encoders
     
-    for i in categoricalColumnNames:
-        labelsDescription = encoders[i].classes_
+    for categoricalColumn in categoricalColumnNames:
+        labelsDescription = encoders[categoricalColumn].classes_
         labelsDescription = labelsDescription.tolist()
-        for l in labelsDescription:
-            if my_object[i].item() == l:
-                #print("Klasa - ", my_object[i].item(), "Label -> ", labelsDescription.index(l))
-                my_object[i] = labelsDescription.index(l)
-        # my_object[i] = np.where(labelsDescription == my_object[i])
-    prediction = model.predict(my_object)
+        for label in labelsDescription:
+            if objectToPredict[categoricalColumn].item() == label:
+                objectToPredict[categoricalColumn] = labelsDescription.index(label)
+    prediction = model.predict(objectToPredict)
     prediction = encoders[columnName].inverse_transform(prediction)
     return prediction
 
 def createLabelEncoding(datasetToEncode):
     global encoders, labelsDescription
     
-    for i in allCategoricalColumns:
-        encoders[i] = LabelEncoder()
-        uniqueValues = list(datasetToEncode[i].unique())
-        encoders[i] = encoders[i].fit(uniqueValues)
-        datasetToEncode[i] = encoders[i].transform(datasetToEncode[i])
+    for categoricalColumn in allCategoricalColumns:
+        encoders[categoricalColumn] = LabelEncoder()
+        uniqueValues = list(datasetToEncode[categoricalColumn].unique())
+        encoders[categoricalColumn] = encoders[categoricalColumn].fit(uniqueValues)
+        datasetToEncode[categoricalColumn] = encoders[categoricalColumn].transform(datasetToEncode[categoricalColumn])
         
     return datasetToEncode
 
@@ -117,7 +111,6 @@ def setPhoto(category, side):
     global products, link, chosenProduct
     if side == 'left':
         link = str(resultSkinCare.get(category))
-        #print("----------------------- link" + link)
         chosenProduct = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
         if chosenProduct != "0": 
             col1, col2, = st.columns([1,3])
@@ -134,10 +127,8 @@ def setPhoto(category, side):
             st.markdown(clearText(resultSkinCare.get(category)))
     else:
         link = str(resultSkinCare.get(category))
-        #print("----------------------- link" + link)
         chosenProduct = clearText(str(products.get(clearText(link)))).replace("{","").replace("0: ","").replace("}","")
         if chosenProduct != "0": 
-            #print("----------------------- val" + value)
             col1, col2, = st.columns([3,1])
             with col1:
                 st.markdown("")
@@ -146,17 +137,16 @@ def setPhoto(category, side):
                 st.markdown("")
                 st.markdown(clearText(resultSkinCare.get(category)))
             with col2:
-                #print("-----------------------" + value)
                 try:
                     st.image(chosenProduct, width=150)
                 except:
                     st.error("Wystąpił błąd! Proszę spróbować później.")
-                    send_message("Błąd podczas wyświetlania zdjęcia " + chosenProduct)
+                    sendToTelegram("Błąd podczas wyświetlania zdjęcia " + chosenProduct)
         else:
             st.markdown(clearText(resultSkinCare.get(category)))
            
 
-def showGUI(dum_df, dataset, products):
+def showGUI(convertedDataset, plainDataset):
     global skinType, isSensitive, mainProblem, secondProblem, age, accuracy, link, chosenProduct   
 
     st.set_page_config(
@@ -228,21 +218,20 @@ def showGUI(dum_df, dataset, products):
     clicked = form.form_submit_button("Wyślij")
     if clicked:
         
-            myDataframe = {'Typ cery': skinType,
+            userData = {'Typ cery': skinType,
                         'Główny problem': mainProblem,
                         'Poboczny problem': secondProblem,
                         'Wrażliwa': isSensitive,
                         'Wiek': age}
             
-            df = pd.DataFrame.from_dict([myDataframe])
-            for i in decisionColumnNames:
-                problemModel = makeSingleProblemTree(i, dum_df, dataset)
-                result = predictMyObject(problemModel, df, i)
-                resultSkinCare[i] = result
-
-            st.session_state.accuracy = df
+            userDataFrame = pd.DataFrame.from_dict([userData])
+            st.session_state.accuracy = userDataFrame
             with st.spinner('Tworzę Twój plan pielęgnacyjny...'):
-                time.sleep(4)
+                for singleDecisionColumn in decisionColumnNames:
+                    problemModel = makeSingleProblemTree(singleDecisionColumn, convertedDataset, plainDataset)
+                    result = predictMyObject(problemModel, userDataFrame, singleDecisionColumn)
+                    resultSkinCare[singleDecisionColumn] = result
+
             st.success('Skończone!')
     
             st.header('Proponowana pielęgnacja')
@@ -257,7 +246,7 @@ def showGUI(dum_df, dataset, products):
                     counter += 1
                 except:
                     st.error("Wystąpił błąd! Proszę spróbować później.")
-                    send_message(createMessage(myDataframe, "Błąd podczas wyświetlania produktu - " + name 
+                    sendToTelegram(createMessage(userData, "Błąd podczas wyświetlania produktu - " + name 
                     + "\nLink - " + str(link) 
                     + "\nProdukt - " + str(chosenProduct))
                     )
@@ -269,7 +258,7 @@ def showGUI(dum_df, dataset, products):
             # devClicked = st.button("Strefa dewelopera")
             # if devClicked:
             #     #open("dev_page.py")
-            df = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
+            userDataFrame = pd.DataFrame({"Kategoria": accuracy.keys(), "Dokładność": accuracy.values()})
             
             #     st.dataframe(data=df)
 
@@ -284,8 +273,8 @@ def main():
     products = products.to_dict()
     dataset = pd.read_csv("daneSkinCare.csv", sep=';')
     dataset = dataset.loc[:, ~dataset.columns.str.contains('^Unnamed')]
-    dum_df = createLabelEncoding(dataset)
-    showGUI(dum_df, dataset, products)
+    labeledDataset = createLabelEncoding(dataset)
+    showGUI(labeledDataset, dataset)
 
 if __name__ == '__main__':
     main()
