@@ -152,47 +152,7 @@ def createLabelEncoding(datasetToEncode):
         encoders[categoricalColumn] = encoders[categoricalColumn].fit(uniqueValues)
         datasetToEncode[categoricalColumn] = encoders[categoricalColumn].transform(datasetToEncode[categoricalColumn])
         
-    return datasetToEncode
-
-def clearSkinTypeMisspelledData(datasetToClean):
-    datasetToClean.loc[(datasetToClean["Typ cery"] == "tłusta") | 
-                        (datasetToClean["Typ cery"] == "tlusta") | 
-                        (datasetToClean["Typ cery"] == "Tlusta"), "Typ cery"] = "Tłusta"
-    datasetToClean.loc[(datasetToClean["Typ cery"] == "mieszana"), "Typ cery"] = "Mieszana"
-    datasetToClean.loc[(datasetToClean["Typ cery"] == "sucha"), "Typ cery"] = "Sucha"
-    datasetToClean.loc[(datasetToClean["Typ cery"] == "normalna"), "Typ cery"] = "Normalna"
-
-def clearMainOrsecondProblemMisspelledData(datasetToClean, mainOrsecondProblem):
-    datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "nadprodukcja sebum") | 
-                        (datasetToClean[mainOrsecondProblem] == "nadprodukcja Sebum"), mainOrsecondProblem] = "Nadprodukcja sebum"
-    datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "niedoskonałości") | 
-                        (datasetToClean[mainOrsecondProblem] == "niedoskonalosci") |
-                        (datasetToClean[mainOrsecondProblem] == "niedoskonałosci") |
-                        (datasetToClean[mainOrsecondProblem] == "niedoskonalości") |
-                        (datasetToClean[mainOrsecondProblem] == "Niedoskonalości") | 
-                        (datasetToClean[mainOrsecondProblem] == "Niedoskonalosci") |
-                        (datasetToClean[mainOrsecondProblem] == "Niedoskonałosci") | mainOrsecondProblem] = "Niedoskonałości"
-    datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "podrażnienie") | 
-                        (datasetToClean[mainOrsecondProblem] == "podraznienie") |
-                        (datasetToClean[mainOrsecondProblem] == "Podraznienie") , mainOrsecondProblem] = "Podrażnienie"
-    datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "przebarwienia"), mainOrsecondProblem] = "Przebarwienia"
-    datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "rozszerzone pory") | 
-                        (datasetToClean[mainOrsecondProblem] == "Rozszerzone Pory") |
-                        (datasetToClean[mainOrsecondProblem] == "rozszerzone Pory") , mainOrsecondProblem] = "Rozszerzone pory"
-    datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "suche skórki") | 
-                        (datasetToClean[mainOrsecondProblem] == "suche Skórki") |
-                        (datasetToClean[mainOrsecondProblem] == "Suche skorki") |
-                        (datasetToClean[mainOrsecondProblem] == "suche skorki") |
-                        (datasetToClean[mainOrsecondProblem] == "suche Skorki"), mainOrsecondProblem] = "Suche skórki"
-    datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "szara cera") | 
-                        (datasetToClean[mainOrsecondProblem] == "szara Cera") |
-                        (datasetToClean[mainOrsecondProblem] == "Szara Cera"), mainOrsecondProblem] = "Szara cera"
-    datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "widoczne naczynka") | 
-                        (datasetToClean[mainOrsecondProblem] == "Widoczne Naczynka") |
-                        (datasetToClean[mainOrsecondProblem] == "widoczne Naczynka"), mainOrsecondProblem] = "Widoczne naczynka"
-    if mainOrsecondProblem == "Poboczny problem":
-        datasetToClean.loc[(datasetToClean["Poboczny problem"] == "brak"), "Poboczny problem"] = "Brak"
-    
+    return datasetToEncode   
     
 
 def setPhoto(category, side):
