@@ -124,11 +124,7 @@ def show_gui():
     page_icon="skincareIcon.png"
     )
 
-    col1, col2, = st.columns([1,3])
-    with col1:
-        st.image("skincareIcon.png", width=120)
-    with col2:
-        st.title("Kreator planów pielęgnacyjnych")
+    st.title("Kreator planów pielęgnacyjnych")
 
     form = st.form("my_form")
     form.subheader('Jaki masz typ cery?')
