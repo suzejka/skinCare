@@ -62,70 +62,65 @@ def create_label_encoding(datasetToEncode):
         datasetToEncode[categoricalColumn] = ENCODERS[categoricalColumn].transform(datasetToEncode[categoricalColumn])
     return datasetToEncode
 
-def set_chosen_product_link(category):
-    global CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE, PREDICTED_PRODUCT, PRODUCTS
-    
+def show_photo_using_link(link):
+    if link != "0":
+        try:
+            st.image(link, width=150)
+        except Exception:
+            st.error("Wystąpił błąd! Proszę spróbować później.")
+            bot.send_message_to_telegram("Błąd podczas wyświetlania zdjęcia " + link)
+
+def set_left_photo(category, result, link):
+    col1, col2, = st.columns([1,3])
+    with col1:
+        show_photo_using_link(link)
+    with col2:
+        st.markdown("")
+        st.markdown("")
+        st.markdown("")
+        st.markdown("")
+        st.markdown(clear_text(result.get(category)))
+
+def set_right_photo(category, result, link):
+    col1, col2, = st.columns([3,1])
+    with col1:
+        st.markdown("")
+        st.markdown("")
+        st.markdown("")
+        st.markdown("")
+        st.markdown(clear_text(result.get(category)))
+    with col2:
+        show_photo_using_link(link)
+
+def clear_product_link(product):
+    global PRODUCTS
+    return clear_text(str(PRODUCTS.get(clear_text(product)))).replace("{","").replace("0: ","").replace("}","")
+
+def does_product_link_exist_in_product_dataset(product):
+    global PRODUCTS
+    return PRODUCTS.keys().__contains__(product) or product is not None
+
+def show_only_product_name(category):
+    st.markdown(clear_text(RESULT_SKIN_CARE.get(category)))
 
 def set_photo(category, side):
     global PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE
-    if side == 'left':
-        PREDICTED_PRODUCT = str(RESULT_SKIN_CARE.get(category))
-        if PRODUCTS.keys().__contains__(PREDICTED_PRODUCT) or PREDICTED_PRODUCT is None:
-            CHOSEN_PRODUCT_LINK = "0"
-            print(":)")
-        else:
-            CHOSEN_PRODUCT_LINK = clear_text(str(PRODUCTS.get(clear_text(PREDICTED_PRODUCT)))).replace("{","").replace("0: ","").replace("}","")
-        
-        if CHOSEN_PRODUCT_LINK != "0" and CHOSEN_PRODUCT_LINK != "None" and CHOSEN_PRODUCT_LINK != "nan":
-            col1, col2, = st.columns([1,3])
-            with col1:
-                if CHOSEN_PRODUCT_LINK != "0":
-                    st.image(CHOSEN_PRODUCT_LINK, width=150)
-            with col2:
-                st.markdown("")
-                st.markdown("")
-                st.markdown("")
-                st.markdown("")
-                st.markdown(clear_text(RESULT_SKIN_CARE.get(category)))
-        else:
-            st.markdown(clear_text(RESULT_SKIN_CARE.get(category)))
+    PREDICTED_PRODUCT = str(RESULT_SKIN_CARE.get(category))
+
+    if does_product_link_exist_in_product_dataset(PREDICTED_PRODUCT):
+        CHOSEN_PRODUCT_LINK = clear_product_link(PREDICTED_PRODUCT)
     else:
-        PREDICTED_PRODUCT = str(RESULT_SKIN_CARE.get(category))
-        if PRODUCTS.keys().__contains__(PREDICTED_PRODUCT) or PREDICTED_PRODUCT is None:
-            CHOSEN_PRODUCT_LINK = "0"
-        else:
-            CHOSEN_PRODUCT_LINK = clear_text(str(PRODUCTS.get(clear_text(PREDICTED_PRODUCT)))).replace("{","").replace("0: ","").replace("}","")
-        if CHOSEN_PRODUCT_LINK != "0" and CHOSEN_PRODUCT_LINK != "None" and CHOSEN_PRODUCT_LINK != "nan":
-            col1, col2, = st.columns([3,1])
-            with col1:
-                st.markdown("")
-                st.markdown("")
-                st.markdown("")
-                st.markdown("")
-                st.markdown(clear_text(RESULT_SKIN_CARE.get(category)))
-            with col2:
-                try:
-                    st.image(CHOSEN_PRODUCT_LINK, width=150)
-                except Exception:
-                    st.error("Wystąpił błąd! Proszę spróbować później.")
-                    bot.send_message_to_telegram("Błąd podczas wyświetlania zdjęcia " + CHOSEN_PRODUCT_LINK)
-        else:
-            st.markdown(clear_text(RESULT_SKIN_CARE.get(category)))
-           
-def show_gui():
-    global SKIN_TYPE, IS_SENSITIVE, MAIN_PROBLEM, SECOND_PROBLEM, AGE, ACCURACY, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK   
+        CHOSEN_PRODUCT_LINK = "0"
 
-    st.set_page_config(
-     page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
-     menu_items={
-        'Report a bug': "https://forms.gle/5KV7rdhNi8epigL26",
-        'About': "# Praca inżynierska. *s20943*"
-        },
-    page_icon="skincareIcon.png"
-    )
+    if CHOSEN_PRODUCT_LINK in ["0", "None", "nan"]:
+        show_only_product_name(category)
+    elif side == 'left':
+        set_left_photo(category, RESULT_SKIN_CARE, CHOSEN_PRODUCT_LINK)
+    else:
+        set_right_photo(category, RESULT_SKIN_CARE, CHOSEN_PRODUCT_LINK)
 
-    st.title("Kreator planów pielęgnacyjnych")
-
+def create_form():
+    global SKIN_TYPE, IS_SENSITIVE, MAIN_PROBLEM, SECOND_PROBLEM, AGE
     form = st.form("my_form")
     form.subheader('Jaki masz typ cery?')
     SKIN_TYPE = form.radio(
@@ -176,6 +171,49 @@ def show_gui():
 
     form.subheader('Ile masz lat?')
     AGE = form.slider("", 16, 100)
+    return form
+
+def set_left_or_right_photo(name, counter):
+    side = 'left' if counter % 2 == 0 else 'right'
+    set_photo(name, side)
+
+def show_important_information():
+    helpMessage = "1. Przedstawione produkty to tylko i wyłącznie PROPOZYCJA pielęgnacji! Użycie programu nie zastąpi wizyty u specjalisty!\n"\
+    "2. Jeżeli zaproponowana maseczka składa się z dwóch produktów, oznacza to, że na początku należy nałożyć pierwszy produkt i następnie (bez zmywania) nałożyć maseczkę. "\
+    "W przypadku kwasu salicylowego, należy odczekać 15/20 minut przed nałożeniem maseczki. \n3. Jeżeli proponowana maseczka zawiera w sobie glinkę, należy pamiętać, "\
+    "że glinka nigdy nie powinna zasychać, dlatego warto dodać do maseczki kilka kropel ulubionego oleju kosmetycznego lub nałożoną maseczkę zwilżać poprzez spryskiwanie "\
+    "twarzy wodą."
+    st.caption("")
+    st.caption("")
+    st.caption("")
+    st.caption(helpMessage)
+
+def set_configuration_of_page():
+    st.set_page_config(
+    page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
+    menu_items={
+    'Report a bug': "https://forms.gle/5KV7rdhNi8epigL26",
+    'About': "# Praca inżynierska. *s20943*"
+    },
+    page_icon="skincareIcon.png"
+    )
+
+def predict_result_using_input_data(userDataFrame):
+    global RESULT_SKIN_CARE, DECISION_COLUMN_NAMES
+    for singleDecisionColumn in DECISION_COLUMN_NAMES:
+        filename = "{column}.sv".format(column = singleDecisionColumn.replace(" ", "_"))
+        problemModel = pickle.load(open(filename, 'rb'))
+        result = predict_my_object(problemModel, userDataFrame, singleDecisionColumn)
+        RESULT_SKIN_CARE[singleDecisionColumn] = result
+
+def show_gui():
+    global SKIN_TYPE, IS_SENSITIVE, MAIN_PROBLEM, SECOND_PROBLEM, AGE, ACCURACY, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK   
+
+    set_configuration_of_page()
+
+    st.title("Kreator planów pielęgnacyjnych")
+
+    form = create_form()
 
     if form.form_submit_button("Wyślij"):
         userData = {'Typ cery': SKIN_TYPE,
@@ -187,23 +225,16 @@ def show_gui():
         userDataFrame = pd.DataFrame.from_dict([userData])
         st.session_state.accuracy = userDataFrame
         with st.spinner('Tworzę Twój plan pielęgnacyjny...'):
-            for singleDecisionColumn in DECISION_COLUMN_NAMES:
-                filename = "{column}.sv".format(column = singleDecisionColumn.replace(" ", "_"))
-                problemModel = pickle.load(open(filename, 'rb'))
-                result = predict_my_object(problemModel, userDataFrame, singleDecisionColumn)
-                RESULT_SKIN_CARE[singleDecisionColumn] = result
+            predict_result_using_input_data(userDataFrame)
 
         st.success('Skończone!')
-
         st.header('Proponowana pielęgnacja')
+
         counter = 0
         for name in DECISION_COLUMN_NAMES:
             st.subheader(name)
             try:
-                side = 'right'
-                if counter % 2 == 0:
-                    side = 'left'
-                set_photo(name, side)
+                set_left_or_right_photo(name, counter)
                 counter += 1
             except Exception:
                 st.error("Wystąpił błąd! Proszę spróbować później.")
@@ -212,23 +243,23 @@ def show_gui():
                 + "\nProdukt - " + str(PREDICTED_PRODUCT) 
                 + "\nLink - " + str(CHOSEN_PRODUCT_LINK))
                 + "\n" + traceback.format_exc())
-        helpMessage = "1. Przedstawione produkty to tylko i wyłącznie PROPOZYCJA pielęgnacji! Użycie programu nie zastąpi wizyty u specjalisty!\n2. Jeżeli zaproponowana maseczka składa się z dwóch produktów, oznacza to, że na początku należy nałożyć pierwszy produkt i następnie (bez zmywania) nałożyć maseczkę. W przypadku kwasu salicylowego, należy odczekać 15/20 minut przed nałożeniem maseczki. \n3. Jeżeli proponowana maseczka zawiera w sobie glinkę, należy pamiętać, że glinka nigdy nie powinna zasychać, dlatego warto dodać do maseczki kilka kropel ulubionego oleju kosmetycznego lub nałożoną maseczkę zwilżać poprzez spryskiwanie twarzy wodą."
-        st.caption("")
-        st.caption("")
-        st.caption("")
-        st.caption(helpMessage)
-        userDataFrame = pd.DataFrame(
-            {"Kategoria": ACCURACY.keys(), 
-            "Dokładność": ACCURACY.values()}
-            )
+        show_important_information()
+
+        # userDataFrame = pd.DataFrame(
+        #     {"Kategoria": ACCURACY.keys(), 
+        #     "Dokładność": ACCURACY.values()}
+        #     )
         
         st.stop()
 
-def main():
+def read_products():
     global PRODUCTS
     PRODUCTS = pd.read_csv("products.csv", sep=';')
     PRODUCTS = PRODUCTS.to_dict()
-    dataset = pd.read_csv("DATASET.csv", encoding='cp1250')
+
+def main():
+    read_products()
+    dataset = pd.read_csv("DATASET.csv", encoding='utf-16')
     create_label_encoding(dataset)
     show_gui()
 

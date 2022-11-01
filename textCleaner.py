@@ -1,3 +1,18 @@
+ASKED_COLUMN_NAMES = ['Typ cery', 'Główny problem', 'Poboczny problem', 'Wrażliwa','Wiek']
+CATEGORICAL_COLUMN_NAMES = ['Typ cery', 'Główny problem', 'Poboczny problem']
+DECISION_COLUMN_NAMES = ['Mycie',
+'Serum na dzień',
+'Krem na dzień',
+'SPF',
+'Serum na noc',
+'Krem na noc',
+'Punktowo',
+'Maseczka',
+'Peeling'
+]
+ALL_COLUMNS = ASKED_COLUMN_NAMES + DECISION_COLUMN_NAMES
+ALL_CATEGORICAL_COLUMNS = CATEGORICAL_COLUMN_NAMES + DECISION_COLUMN_NAMES
+
 def clear_skin_type_misspelled_data(datasetToClean):
     datasetToClean.loc[(datasetToClean["Typ cery"] == "tłusta") | 
                         (datasetToClean["Typ cery"] == "tlusta") | 
@@ -63,10 +78,13 @@ def clear_main_or_second_problem_misspelled_data(datasetToClean, mainOrsecondPro
         datasetToClean.loc[(datasetToClean["Poboczny problem"] == "brak"), "Poboczny problem"] = "Brak"
 
 def clear_data(datasetToClean):
+    datasetToClean.replace(u'\xa0', u' ', regex=True, inplace=True)
+    datasetToClean["Wrażliwa"].fillna(1, inplace=True)
     datasetToClean.dropna(inplace=True)
     clear_skin_type_misspelled_data(datasetToClean)
     clear_main_or_second_problem_misspelled_data(datasetToClean, "Główny problem")
     clear_main_or_second_problem_misspelled_data(datasetToClean, "Poboczny problem")
     datasetToClean.drop_duplicates(inplace=True)
     datasetToClean = datasetToClean[datasetToClean["Wiek"] >= 16]
+    return datasetToClean
 

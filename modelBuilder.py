@@ -1,4 +1,5 @@
 import pickle
+import sys
 import pandas as pd
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
@@ -23,12 +24,12 @@ MAIN_PROBLEM = None
 SECOND_PROBLEM = None
 AGE = None
 RESULT_SKIN_CARE = {}
-MODELS = []
 ACCURACY = {}
 PRODUCTS = {}
 LINK = None
 CHOSEN_PRODUCT = None
 DATASET = None
+VALIDATION_DATASET = None
 
 ASKED_COLUMN_NAMES = ['Typ cery', 'Główny problem', 'Poboczny problem', 'Wrażliwa','Wiek']
 CATEGORICAL_COLUMN_NAMES = ['Typ cery', 'Główny problem', 'Poboczny problem']
@@ -90,6 +91,7 @@ def make_single_problem_tree(problemName, dumDf, dataset, maxDepth = None, crite
     problemIndex = getProblemColumnIndex(problemName)
     X = dumDf.values[:, 1:6]
     yProblem = dumDf.values[:, problemIndex]
+
     X_train, X_test, y_train, y_test = train_test_split(X, yProblem, test_size = 0.25, random_state = 100)
     model = DecisionTreeClassifier(max_depth=maxDepth, criterion=criterion)
     model = model.fit(X_train, y_train)
@@ -99,6 +101,7 @@ def make_single_problem_tree(problemName, dumDf, dataset, maxDepth = None, crite
 
 def tuneTreeModel(labeledData):
     global DATASET
+    models = {}
     for singleDecisionColumn in DECISION_COLUMN_NAMES:
         X = labeledData.values[:, 1:6]
         problemIndex = getProblemColumnIndex(singleDecisionColumn)
@@ -132,7 +135,9 @@ def tuneTreeModel(labeledData):
         problemModel = make_single_problem_tree(singleDecisionColumn, labeledData, DATASET, maxDepth=bestDepth, criterion=bestCriterion)
         filename = "{filename}.sv".format(filename = singleDecisionColumn.replace(" ", "_"))
         pickle.dump(problemModel, open(filename,'wb'))
-        MODELS.append(problemModel)
+        models[singleDecisionColumn] = problemModel
+    return models
+        
 
 def create_label_encoding(datasetToEncode):
     global ENCODERS, LABELS_DESCRIPTION
@@ -144,25 +149,36 @@ def create_label_encoding(datasetToEncode):
     return datasetToEncode
      
 
-def buildModels(convertedDataset):
-    problemModel = tuneTreeModel(convertedDataset)
-    
+def buildModels(convertedDataset, convertedValidationDataset):
+    problemModels = tuneTreeModel(convertedDataset)
+    print(convertedValidationDataset)
+    for modelName in problemModels:
+        X = convertedValidationDataset.values[:, 1:6]
+        problemIndex = getProblemColumnIndex(modelName)
+        yProblem = convertedValidationDataset.values[:, problemIndex]    
+        #predict validation set and print accuracy
+        validationPrediction = problemModels[modelName].predict(X) 
+        #print model accuracy
+        print(f"Accuracy of {modelName} model: {accuracy_score(yProblem, validationPrediction) * 100}%")
+            #confusing matrix
       
 def main():
-    global PRODUCTS
-    PRODUCTS = pd.read_csv("products.csv", sep=';') # pobranie produktów z pliku
-    PRODUCTS = PRODUCTS.to_dict()
+    global PRODUCTS, DATASET, ACCURACY
+    PRODUCTS = pd.read_csv("products.csv", sep=';') # pobranie produktów z pliku    
     DATASET = pd.read_csv("daneSkinCare.csv") # pobranie danych z pliku
+    VALIDATION_DATASET = pd.read_csv("validationDataset.csv") # pobranie danych walidacyjnych z pliku
+
+    PRODUCTS = PRODUCTS.to_dict()
+
     DATASET = DATASET.loc[:, ~DATASET.columns.str.contains('^Unnamed')] # usuwanie niepotrzebnych kolumn
-    textCleaner.clear_data(DATASET) # czyszczenie danych
-    DATASET.to_csv("DATASET.csv", index=False, encoding='cp1250', sep=',') # UTF-16 to encoding, który obsługuje polskie znaki
-    
+    DATASET = textCleaner.clear_data(DATASET) # czyszczenie danych
+    DATASET.to_csv("DATASET.csv", index=False, encoding='utf-16', sep=',') # UTF-16 to encoding, który obsługuje polskie znaki
 
-
+    labeledValidationDataset = create_label_encoding(VALIDATION_DATASET) # zakodowanie danych walidacyjnych    
     labeledDataset = create_label_encoding(DATASET) # tworzenie kodowania etykiet
-    buildModels(labeledDataset) # budowanie modeli
-    print(ACCURACY)
 
+    buildModels(labeledDataset, labeledValidationDataset) # budowanie modeli
+    print(ACCURACY)
 
 if __name__ == '__main__':
     main()
