@@ -7,6 +7,7 @@ import warnings
 import telegramBot as bot
 import textCleaner as cleaner
 import traceback
+import json
 warnings.filterwarnings("ignore")
 
 ENCODERS = {}
@@ -37,11 +38,10 @@ DECISION_COLUMN_NAMES = ['Mycie',
 ALL_COLUMNS = ASKED_COLUMN_NAMES + DECISION_COLUMN_NAMES
 ALL_CATEGORICAL_COLUMNS = CATEGORICAL_COLUMN_NAMES + DECISION_COLUMN_NAMES
 
-def clear_text(text):
-    text = str(text).replace("'","").replace("[","").replace("]","").replace("\\xa0", " ")
-    return text
-
 def predict_my_object(model, objectToPredict, columnName):
+    '''
+    Funkcja przewidująca obiekt
+    '''
     global ENCODERS
     for categoricalColumn in CATEGORICAL_COLUMN_NAMES:
         labelsDescription = ENCODERS[categoricalColumn].classes_
@@ -54,6 +54,9 @@ def predict_my_object(model, objectToPredict, columnName):
     return prediction
 
 def create_label_encoding(datasetToEncode):
+    '''
+    Tworzy kodowanie etykiet
+    '''
     global ENCODERS, LABELS_DESCRIPTION
     for categoricalColumn in ALL_CATEGORICAL_COLUMNS:
         ENCODERS[categoricalColumn] = LabelEncoder()
@@ -63,6 +66,9 @@ def create_label_encoding(datasetToEncode):
     return datasetToEncode
 
 def show_photo_using_link(link):
+    '''
+    Wyświetla zdjęcie produktu
+    '''
     if link != "0":
         try:
             st.image(link, width=150)
@@ -71,6 +77,9 @@ def show_photo_using_link(link):
             bot.send_message_to_telegram("Błąd podczas wyświetlania zdjęcia " + link)
 
 def set_left_photo(category, result, link):
+    '''
+    Ustawia zdjęcie produktu po lewej stronie
+    '''
     col1, col2, = st.columns([1,3])
     with col1:
         show_photo_using_link(link)
@@ -79,31 +88,46 @@ def set_left_photo(category, result, link):
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        st.markdown(clear_text(result.get(category)))
+        st.markdown(cleaner.remove_punctuation_marks(result.get(category)))
 
 def set_right_photo(category, result, link):
+    '''
+    Ustawia zdjęcie produktu po prawej stronie
+    '''
     col1, col2, = st.columns([3,1])
     with col1:
         st.markdown("")
         st.markdown("")
         st.markdown("")
         st.markdown("")
-        st.markdown(clear_text(result.get(category)))
+        st.markdown(cleaner.remove_punctuation_marks(result.get(category)))
     with col2:
         show_photo_using_link(link)
 
 def clear_product_link(product):
+    '''
+    Czyści link do produktu
+    '''
     global PRODUCTS
-    return clear_text(str(PRODUCTS.get(clear_text(product)))).replace("{","").replace("0: ","").replace("}","")
+    return cleaner.remove_punctuation_marks(str(PRODUCTS.get(cleaner.remove_punctuation_marks(product)))).replace("{","").replace("0: ","").replace("}","")
 
 def does_product_link_exist_in_product_dataset(product):
+    '''
+    Sprawdza czy link do produktu istnieje w bazie produktów
+    '''
     global PRODUCTS
     return PRODUCTS.keys().__contains__(product) or product is not None
 
 def show_only_product_name(category):
-    st.markdown(clear_text(RESULT_SKIN_CARE.get(category)))
+    '''
+    Wyświetla tylko nazwę produktu
+    '''
+    st.markdown(cleaner.remove_punctuation_marks(RESULT_SKIN_CARE.get(category)))
 
 def set_photo(category, side):
+    '''
+    Ustawia zdjęcie produktu
+    '''
     global PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE
     PREDICTED_PRODUCT = str(RESULT_SKIN_CARE.get(category))
 
@@ -119,7 +143,20 @@ def set_photo(category, side):
     else:
         set_right_photo(category, RESULT_SKIN_CARE, CHOSEN_PRODUCT_LINK)
 
+    st.caption(f"Dokładność przewidywania: {str(ACCURACY.get(category))}%")
+    
+def read_accuray_from_file():
+    '''
+    Odczytuje accuracy z pliku
+    '''
+    global ACCURACY
+    with open('accuracy.json') as json_file:
+        ACCURACY = json.load(json_file)
+
 def create_form():
+    '''
+    Funkcja tworzy formularz do wprowadzania danych
+    '''
     global SKIN_TYPE, IS_SENSITIVE, MAIN_PROBLEM, SECOND_PROBLEM, AGE
     form = st.form("my_form")
     form.subheader('Jaki masz typ cery?')
@@ -174,13 +211,18 @@ def create_form():
     return form
 
 def set_left_or_right_photo(name, counter):
+    '''
+    Ustawia zdjęcie produktu na lewo lub prawo naprzemiennie
+    '''
     side = 'left' if counter % 2 == 0 else 'right'
     set_photo(name, side)
 
 def show_important_information():
-    helpMessage = "1. Przedstawione produkty to tylko i wyłącznie PROPOZYCJA pielęgnacji! Użycie programu nie zastąpi wizyty u specjalisty!\n"\
-    "2. Jeżeli zaproponowana maseczka składa się z dwóch produktów, oznacza to, że na początku należy nałożyć pierwszy produkt i następnie (bez zmywania) nałożyć maseczkę. "\
-    "W przypadku kwasu salicylowego, należy odczekać 15/20 minut przed nałożeniem maseczki. \n3. Jeżeli proponowana maseczka zawiera w sobie glinkę, należy pamiętać, "\
+    '''
+    Wyświetla informacje o tym, że aplikacja nie jest lekarzem i nie może diagnozować
+    '''
+    helpMessage = "1. Jeżeli zaproponowana maseczka składa się z dwóch produktów, oznacza to, że na początku należy nałożyć pierwszy produkt i następnie (bez zmywania) nałożyć maseczkę. "\
+    "W przypadku kwasu salicylowego, należy odczekać 15/20 minut przed nałożeniem maseczki. \n2. Jeżeli proponowana maseczka zawiera w sobie glinkę, należy pamiętać, "\
     "że glinka nigdy nie powinna zasychać, dlatego warto dodać do maseczki kilka kropel ulubionego oleju kosmetycznego lub nałożoną maseczkę zwilżać poprzez spryskiwanie "\
     "twarzy wodą."
     st.caption("")
@@ -189,6 +231,9 @@ def show_important_information():
     st.caption(helpMessage)
 
 def set_configuration_of_page():
+    '''
+    Ustawia konfigurację strony
+    '''
     st.set_page_config(
     page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
     menu_items={
@@ -199,6 +244,9 @@ def set_configuration_of_page():
     )
 
 def predict_result_using_input_data(userDataFrame):
+    '''
+    Funkcja przewidująca wynik na podstawie danych wejściowych
+    '''
     global RESULT_SKIN_CARE, DECISION_COLUMN_NAMES
     for singleDecisionColumn in DECISION_COLUMN_NAMES:
         filename = "{column}.sv".format(column = singleDecisionColumn.replace(" ", "_"))
@@ -207,10 +255,12 @@ def predict_result_using_input_data(userDataFrame):
         RESULT_SKIN_CARE[singleDecisionColumn] = result
 
 def show_gui():
+    '''
+    Funkcja odpowiedzialna za wyświetlenie interfejsu graficznego.
+    '''
     global SKIN_TYPE, IS_SENSITIVE, MAIN_PROBLEM, SECOND_PROBLEM, AGE, ACCURACY, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK   
 
     set_configuration_of_page()
-
     st.title("Kreator planów pielęgnacyjnych")
 
     form = create_form()
@@ -229,6 +279,8 @@ def show_gui():
 
         st.success('Skończone!')
         st.header('Proponowana pielęgnacja')
+        st.info("Przedstawione produkty to tylko i wyłącznie PROPOZYCJA pielęgnacji! Użycie programu nie zastąpi wizyty u specjalisty!")
+        
 
         counter = 0
         for name in DECISION_COLUMN_NAMES:
@@ -253,6 +305,9 @@ def show_gui():
         st.stop()
 
 def read_products():
+    '''
+    Funkcja wczytująca produkty z pliku
+    '''
     global PRODUCTS
     PRODUCTS = pd.read_csv("products.csv", sep=';')
     PRODUCTS = PRODUCTS.to_dict()
@@ -261,6 +316,7 @@ def main():
     read_products()
     dataset = pd.read_csv("DATASET.csv", encoding='utf-16')
     create_label_encoding(dataset)
+    read_accuray_from_file()
     show_gui()
 
 if __name__ == '__main__':
