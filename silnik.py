@@ -142,8 +142,8 @@ def set_photo(category, side):
         set_left_photo(category, RESULT_SKIN_CARE, CHOSEN_PRODUCT_LINK)
     else:
         set_right_photo(category, RESULT_SKIN_CARE, CHOSEN_PRODUCT_LINK)
-
-    st.caption(f"Dokładność przewidywania: {str(ACCURACY.get(category))}%")
+    #print accuracy of category rounder to 2 decimal places
+    st.caption(f"Dokładność przewidywania: {str(round(ACCURACY.get(category) * 100, 2))}%")
     
 def read_accuray_from_file():
     '''
