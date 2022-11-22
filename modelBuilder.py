@@ -7,16 +7,16 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
-import warnings 
-import requests
-import textCleaner
+import warnings
+from helpers.model_to_file_helper import save_the_best_model, load_the_best_model, remove_temporary_files
+import text_cleaner as cleaner
+import telegram_bot_for_messages as bot
 from sklearn.metrics import accuracy_score
 import json
 from sdv.tabular import GaussianCopula
 import optuna
 from optuna.samplers import TPESampler
-import os
-import shutil
+from helpers.data_preparation_helper import get_problem_column_index
 warnings.filterwarnings("ignore")
 
 ENCODER = None
@@ -82,58 +82,6 @@ def create_synthetic_data(dataset):
     synthetic_data.to_csv('synthetic_data.csv', index=False)
     return synthetic_data
 
-def send_message_to_telegram(message):
-    '''
-    Funkcja wysyła wiadomość do twórcy.
-    '''
-    chatId = '5303880405'
-    botToken = '5660046213:AAHCSDYbdW7E5rc5MnoL1n8QCY-Qh8M1ZgI'
-    url = f"https://api.telegram.org/bot{botToken}/sendMessage?chat_id={chatId}&text={message}"
-    requests.get(url)
-
-def create_message(inputDict, message):
-    '''
-    Funkcja tworzy wiadomość do wysłania do twórcy.
-    '''
-    result = message + '\n'
-    for i in inputDict.keys():
-        result += f"{str(i)}: {str(inputDict[i])}" + '\n'
-    return result
-
-def get_problem_column_index(problemName):
-    '''
-    Funkcja zwraca indeks kolumny z danym problemem.
-    '''
-    if problemName == 'Mycie':
-        return 5
-    elif problemName == 'Serum na dzień':
-        return 6
-    elif problemName == 'Krem na dzień':
-        return  7
-    elif problemName == 'SPF' :
-        return  8
-    elif problemName == 'Serum na noc':
-        return  9
-    elif problemName == 'Krem na noc':
-        return  10
-    elif problemName == 'Punktowo':
-        return  11
-    elif problemName == 'Maseczka':
-        return  12
-    elif problemName == 'Peeling':
-        return  13
-    else :
-        send_message_to_telegram("Błąd! Nie rozpoznano kategorii produktu.")
-        raise ValueError("Nie rozpoznano kategorii produktu.")
-
-def normalize_data(data):
-    result = data.copy()
-    for feature_name in data.columns:
-        max_value = data[feature_name].max()
-        min_value = data[feature_name].min()
-        result[feature_name] = (data[feature_name] - min_value) / (max_value - min_value)
-    return result
-
 def make_single_problem_tree(problemName, dumDf, modelName, **kwargs):
     '''
     Funkcja tworzy drzewo decyzyjne dla pojedynczego problemu.
@@ -167,37 +115,6 @@ def make_single_problem_tree(problemName, dumDf, modelName, **kwargs):
     model = model.fit(X_train, y_train)
  
     return model
-
-def remove_temporary_files():
-    '''
-    Funkcja usuwa tymczasowe pliki.
-    '''
-    shutil.rmtree("temp_models")
-
-def does_path_exist(path):
-    '''
-    Funkcja sprawdza czy ścieżka istnieje.
-    '''
-    return bool(os.path.exists(path))
-
-def load_the_best_model(trial, classifierName, problemName):
-    '''
-    Funkcja ładuje najlepszy model.
-    '''
-    path = f"temp_models/{problemName}"
-    with open("{0}/{1}_{2}_{3}.hdf5".format(path, classifierName, problemName, trial.number), "rb") as fin:
-        best_model = pickle.load(fin)
-    return best_model
-
-def save_the_best_model(trial, classifier, model, problemName):
-    '''
-    Funkcja zapisuje najlepszy model.
-    '''
-    path = f"temp_models/{problemName}"
-    if not does_path_exist(path):
-        os.makedirs(path)
-    with open("{0}/{1}_{2}_{3}.hdf5".format(path, classifier, problemName, trial.number), "wb") as fout:
-        pickle.dump(model, fout)
 
 def get_the_best_model_and_best_score_for_problem(problem):
     '''
@@ -348,21 +265,18 @@ def main():
 
     PRODUCTS = pd.read_csv("products.csv", sep=';') # pobranie produktów z pliku    
     DATASET = pd.read_csv("daneSkinCare.csv") # pobranie danych z pliku
-    VALIDATION_DATASET = pd.read_csv("validationDataset.csv") # pobranie danych walidacyjnych z pliku
 
     PRODUCTS = PRODUCTS.to_dict()
-    DATASET = textCleaner.clear_data(DATASET) # czyszczenie danych
+    DATASET = cleaner.clean_data(DATASET) # czyszczenie danych
 
     synthetic = create_synthetic_data(DATASET) # tworzenie danych syntetycznych
 
     DATASET = DATASET.append(synthetic, ignore_index=True) # dodanie danych syntetycznych do zbioru danych
 
     DATASET.to_csv("DATASET.csv", index=False, encoding='utf-16', sep=',') # UTF-16 to encoding, który obsługuje polskie znaki
-
-    labeledValidationDataset = create_label_encoding(VALIDATION_DATASET) # zakodowanie danych walidacyjnych    
+   
     labeledDataset_global = create_label_encoding(DATASET) # tworzenie kodowania etykiet
     labeledDataset_global.to_csv("labeledDataset.csv", index=False, sep=',')
-    # labeledDataset_global = normalize_data(labeledDataset_global)
     build_models() # budowanie modeli
     
     with open('accuracy.json', 'w') as fp:

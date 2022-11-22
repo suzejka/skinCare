@@ -1,18 +1,3 @@
-ASKED_COLUMN_NAMES = ['Typ cery', 'Główny problem', 'Poboczny problem', 'Wrażliwa','Wiek']
-CATEGORICAL_COLUMN_NAMES = ['Typ cery', 'Główny problem', 'Poboczny problem']
-DECISION_COLUMN_NAMES = ['Mycie',
-'Serum na dzień',
-'Krem na dzień',
-'SPF',
-'Serum na noc',
-'Krem na noc',
-'Punktowo',
-'Maseczka',
-'Peeling'
-]
-ALL_COLUMNS = ASKED_COLUMN_NAMES + DECISION_COLUMN_NAMES
-ALL_CATEGORICAL_COLUMNS = CATEGORICAL_COLUMN_NAMES + DECISION_COLUMN_NAMES
-
 def clear_skin_type_misspelled_data(datasetToClean):
     '''
     Funkcja usuwa błędy w danych dotyczących typu cery.
@@ -91,7 +76,7 @@ def clean_widoczne_naczynka(datasetToClean, mainOrsecondProblem):
                         (datasetToClean[mainOrsecondProblem] == "Widoczne Naczynka") |
                         (datasetToClean[mainOrsecondProblem] == "widoczne Naczynka"), mainOrsecondProblem] = "Widoczne naczynka"
 
-def clear_main_or_second_problem_misspelled_data(datasetToClean, mainOrsecondProblem):
+def clean_main_or_second_problem_misspelled_data(datasetToClean, mainOrsecondProblem):
     '''
     Funkcja usuwa błędy w danych dotyczących głównego problemu.
     '''
@@ -107,7 +92,7 @@ def clear_main_or_second_problem_misspelled_data(datasetToClean, mainOrsecondPro
     if mainOrsecondProblem == "Poboczny problem":
         datasetToClean.loc[(datasetToClean["Poboczny problem"] == "brak"), "Poboczny problem"] = "Brak"
 
-def clear_data(datasetToClean):
+def clean_data(datasetToClean):
     '''
     Funkcja usuwa błędy w danych.
     '''
@@ -116,8 +101,8 @@ def clear_data(datasetToClean):
     datasetToClean["Wrażliwa"].fillna(0, inplace=True)
     datasetToClean.dropna(inplace=True)
     clear_skin_type_misspelled_data(datasetToClean)
-    clear_main_or_second_problem_misspelled_data(datasetToClean, "Główny problem")
-    clear_main_or_second_problem_misspelled_data(datasetToClean, "Poboczny problem")
+    clean_main_or_second_problem_misspelled_data(datasetToClean, "Główny problem")
+    clean_main_or_second_problem_misspelled_data(datasetToClean, "Poboczny problem")
     datasetToClean.drop_duplicates(inplace=True)
     datasetToClean = datasetToClean[datasetToClean["Wiek"] >= 16]
     return datasetToClean
@@ -129,3 +114,8 @@ def remove_punctuation_marks(text):
     text = str(text).replace("'","").replace("[","").replace("]","").replace("\\xa0", " ")
     return text
 
+def clean_product_link(product, PRODUCTS):
+    '''
+    Czyści link do produktu
+    '''
+    return remove_punctuation_marks(str(PRODUCTS.get(remove_punctuation_marks(product)))).replace("{","").replace("0: ","").replace("}","")
