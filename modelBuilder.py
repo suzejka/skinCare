@@ -1,21 +1,20 @@
 import pickle
 import pandas as pd
 import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, classification_report, confusion_matrix, roc_auc_score, roc_curve, log_loss
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 import warnings
-from helpers.model_to_file_helper import save_the_best_model, load_the_best_model, remove_temporary_files
+from helpers.model_to_file_helper import save_model, load_the_best_model, remove_temporary_files, save_accuracy_of_model_to_file, save_model_for_analysis
 import text_cleaner as cleaner
 import telegram_bot_for_messages as bot
 from sklearn.metrics import accuracy_score
 import json
 from sdv.tabular import GaussianCopula
 import optuna
-from optuna.samplers import TPESampler
 from helpers.data_preparation_helper import get_problem_column_index
 warnings.filterwarnings("ignore")
 
@@ -148,20 +147,27 @@ def tune_random_forest_optuna():
         model.fit(X_train, y_train)
         yPrediction = model.predict(X_test)
 
-        save_the_best_model(trial, 'RandomForestClassifier', model, problem_global)
+        save_model(trial, 'RandomForestClassifier', model, problem_global)
 
         return accuracy_score(y_test, yPrediction)
 
+    current_model_accuracy = {}
+    counter = 0
     for problem in DECISION_COLUMN_NAMES:
         problem_global = problem
-        study = optuna.create_study(direction='maximize', sampler=TPESampler(seed=42))
+        study = optuna.create_study(direction='maximize')
         study.optimize(objective, n_trials=100)
         optuna_score_random_forest[problem] = study.best_value
         optuna_best_params_random_forest[problem] = study.best_params
         best_model = load_the_best_model(study.best_trial, 'RandomForestClassifier', problem)
         best_model_random_forest[problem] = [best_model, study.best_value]
+        current_model_accuracy[problem] = study.best_value
+        save_model_for_analysis(trial=study.best_trial, model=best_model, classifier='RandomForestClassifier', problemName=counter)
         remove_temporary_files()
-            
+        counter += 1
+    
+    save_accuracy_of_model_to_file('RandomForestClassifier', current_model_accuracy)
+
 def tune_decision_tree_optuna():
     '''
     Funkcja dokonuje optymalizacji parametrów drzewa decyzyjnego.
@@ -178,10 +184,12 @@ def tune_decision_tree_optuna():
         model.fit(X_train, y_train)
         prediction = model.predict(X_test)
 
-        save_the_best_model(trial, 'DecisionTreeClassifier', model, problem_global)
+        save_model(trial, 'DecisionTreeClassifier', model, problem_global)
 
         return accuracy_score(y_test, prediction)
-        
+
+    current_model_accuracy = {}
+    counter = 0
     for problem in DECISION_COLUMN_NAMES:
         problem_global = problem
         study = optuna.create_study(direction='maximize')
@@ -189,8 +197,13 @@ def tune_decision_tree_optuna():
         optuna_score_decision_tree[problem] = study.best_value
         optuna_best_params_decision_tree[problem] = study.best_params
         best_model = load_the_best_model(study.best_trial, 'DecisionTreeClassifier', problem)
-        best_model_decision_tree[problem] = [best_model, study.best_value]
+        best_model_decision_tree[problem] = [best_model, study.best_value] 
+        current_model_accuracy[problem] = study.best_value
+        save_model_for_analysis(trial=study.best_trial, model=best_model, classifier='DecisionTreeClassifier', problemName=counter)
         remove_temporary_files()
+        counter += 1
+    
+    save_accuracy_of_model_to_file('DecisionTreeClassifier', current_model_accuracy)
         
 def tune_knn_optuna():
     '''
@@ -208,19 +221,27 @@ def tune_knn_optuna():
         model.fit(X_train, y_train)
         yPrediction = model.predict(X_test)
 
-        save_the_best_model(trial, 'KNeighborsClassifier', model, problem_global)
+        save_model(trial, 'KNeighborsClassifier', model, problem_global)
 
         return accuracy_score(y_test, yPrediction)
     
+    current_model_accuracy = {}
+    counter = 0
+
     for problem in DECISION_COLUMN_NAMES:
         problem_global = problem
-        study = optuna.create_study(direction='maximize', sampler=TPESampler(seed=42))
+        study = optuna.create_study(direction='maximize')
         study.optimize(objective, n_trials=100)
         optuna_score_knn[problem] = study.best_value
         optuna_best_params_knn[problem] = study.best_params
         best_model = load_the_best_model(study.best_trial, 'KNeighborsClassifier', problem)
         best_model_knn[problem] = [best_model, study.best_value]
+        current_model_accuracy[problem] = study.best_value
+        save_model_for_analysis(trial=study.best_trial, model=best_model, classifier='KNeighborsClassifier', problemName=counter)
         remove_temporary_files()
+        counter += 1
+
+    save_accuracy_of_model_to_file('KNeighborsClassifier', current_model_accuracy)
         
 def create_label_encoding(datasetToEncode):
     '''

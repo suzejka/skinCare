@@ -25,7 +25,7 @@ def load_the_best_model(trial, classifierName, problemName):
         best_model = pickle.load(fin)
     return best_model
 
-def save_the_best_model(trial, classifier, model, problemName):
+def save_model(trial, classifier, model, problemName):
     '''
     Funkcja zapisuje najlepszy model.
     '''
@@ -35,6 +35,16 @@ def save_the_best_model(trial, classifier, model, problemName):
     with open("{0}/{1}_{2}_{3}.hdf5".format(path, classifier, problemName, trial.number), "wb") as fout:
         pickle.dump(model, fout)
 
+def save_model_for_analysis(trial, classifier, model, problemName):
+    '''
+    Funkcja zapisuje najlepszy model do analizy.
+    '''
+    path = f"models_for_analysis/{problemName}"
+    if not does_path_exist(path):
+        os.makedirs(path)
+    with open("{0}/{1}.hdf5".format(path, classifier), "wb") as fout:
+        pickle.dump(model, fout)
+
 def read_accuray_from_file():
     '''
     Odczytuje accuracy z pliku
@@ -42,3 +52,10 @@ def read_accuray_from_file():
     with open('accuracy.json') as json_file:
         ACCURACY = json.load(json_file)
     return ACCURACY
+
+def save_accuracy_of_model_to_file(model_name, accuracy):
+    '''
+    Zapisuje accuracy do pliku
+    '''
+    with open(f'accuracy_of_{model_name}.json', 'w') as outfile:
+        json.dump(accuracy, outfile)
