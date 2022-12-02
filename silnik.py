@@ -182,7 +182,7 @@ def read_products():
     Funkcja wczytująca produkty z pliku
     '''
     global PRODUCTS
-    PRODUCTS = pd.read_csv("products.csv", sep=';')
+    PRODUCTS = pd.read_csv("raw_data/products.csv", sep=';')
     PRODUCTS = PRODUCTS.to_dict()
 
 def main():
