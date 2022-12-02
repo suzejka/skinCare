@@ -131,3 +131,4 @@ dmypy.json
 .wandb/
 .vscode/
 .ipynb_checkpoints/
+.files_for_documenation/models_for_analysis/
