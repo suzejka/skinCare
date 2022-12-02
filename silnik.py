@@ -162,7 +162,8 @@ def show_gui():
         
         counter = 0
         for name in DECISION_COLUMN_NAMES:
-            st.subheader(name)
+            header_label = ph.if_SPF_change_name_for_user(name)
+            st.subheader(header_label)
             try:
                 photos_helper.set_left_or_right_photo(name, counter, PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE, ACCURACY)
                 counter += 1
@@ -187,7 +188,7 @@ def read_products():
 def main():
     global ACCURACY
     read_products()
-    dataset = pd.read_csv("DATASET.csv", encoding='utf-16')
+    dataset = pd.read_csv("prepared_data/DATASET.csv", encoding='utf-16')
     create_label_encoding(dataset)
     ACCURACY = read_accuray_from_file()
     show_gui()

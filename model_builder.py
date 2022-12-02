@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 import warnings
-from helpers.model_to_file_helper import save_model, load_the_best_model, remove_temporary_files, save_accuracy_of_model_to_file, save_model_for_analysis
+from helpers.model_to_file_helper import save_model, load_the_best_model, remove_temporary_files, save_accuracy_of_model_to_file, save_model_for_analysis, create_path_if_does_not_exist
 import text_cleaner as cleaner
 import telegram_bot_for_messages as bot
 from sklearn.metrics import accuracy_score
@@ -78,7 +78,6 @@ def create_synthetic_data(dataset):
     model.fit(dataset)
     synthetic_data = model.sample(5000)
     synthetic_data = synthetic_data[ALL_COLUMNS]
-    synthetic_data.to_csv('synthetic_data.csv', index=False)
     return synthetic_data
 
 def make_single_problem_tree(problemName, dumDf, modelName, **kwargs):
@@ -284,8 +283,8 @@ def build_models():
 def main():
     global PRODUCTS, DATASET, ACCURACY, labeledDataset_global
 
-    PRODUCTS = pd.read_csv("products.csv", sep=';') # pobranie produktów z pliku    
-    DATASET = pd.read_csv("daneSkinCare.csv") # pobranie danych z pliku
+    PRODUCTS = pd.read_csv("raw_data/products.csv", sep=';') # pobranie produktów z pliku    
+    DATASET = pd.read_csv("raw_data/daneSkinCare.csv") # pobranie danych z pliku
 
     PRODUCTS = PRODUCTS.to_dict()
     DATASET = cleaner.clean_data(DATASET) # czyszczenie danych
@@ -294,13 +293,15 @@ def main():
 
     DATASET = DATASET.append(synthetic, ignore_index=True) # dodanie danych syntetycznych do zbioru danych
 
-    DATASET.to_csv("DATASET.csv", index=False, encoding='utf-16', sep=',') # UTF-16 to encoding, który obsługuje polskie znaki
+    folder = "prepared_data"
+    create_path_if_does_not_exist(folder)
+    DATASET.to_csv("prepared_data/DATASET.csv", index=False, encoding='utf-16', sep=',') # UTF-16 to encoding, który obsługuje polskie znaki
    
     labeledDataset_global = create_label_encoding(DATASET) # tworzenie kodowania etykiet
-    labeledDataset_global.to_csv("labeledDataset.csv", index=False, sep=',')
+    labeledDataset_global.to_csv("prepared_data/labeledDataset.csv", index=False, sep=',')
     build_models() # budowanie modeli
     
-    with open('accuracy.json', 'w') as fp:
+    with open('prepared_data/accuracy.json', 'w') as fp:
         json.dump(ACCURACY, fp)
 
 if __name__ == '__main__':

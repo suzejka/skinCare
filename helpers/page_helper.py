@@ -25,3 +25,9 @@ def set_configuration_of_page():
     },
     page_icon="skincareIcon.png"
     )
+
+def if_SPF_change_name_for_user(name):
+    '''
+    Funkcja odpowiedzialna za zmianę nazwy produktu SPF na "Krem z filtrem UV"
+    '''
+    return "Krem z filtrem przeciwsłonecznym" if name == "SPF" else name
