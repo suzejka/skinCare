@@ -76,7 +76,7 @@ def create_synthetic_data(dataset):
     '''       
     model = GaussianCopula()
     model.fit(dataset)
-    synthetic_data = model.sample(5000)
+    synthetic_data = model.sample(5000 - dataset.shape[0])
     synthetic_data = synthetic_data[ALL_COLUMNS]
     return synthetic_data
 
