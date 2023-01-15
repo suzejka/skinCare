@@ -139,7 +139,9 @@ def show_gui():
     global SKIN_TYPE, IS_SENSITIVE, MAIN_PROBLEM, SECOND_PROBLEM, AGE, ACCURACY, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE, ACCURACY
 
     ph.set_configuration_of_page()
-    st.title("Kreator planów pielęgnacyjnych")
+
+    st.markdown("<h1 style='text-align: center; color: black;'>Witaj w kreatorze planów pielęgnacyjnych!</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; color: black;'>Wypełnij poniższy formularz, a system wygeneruje dla Ciebie przykładowy plan pielęgnacyjny.</h1>", unsafe_allow_html=True)
 
     form = create_form()
 
