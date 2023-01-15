@@ -5,19 +5,19 @@ import json
 
 def remove_temporary_files():
     '''
-    Funkcja usuwa tymczasowe pliki.
+    Removes temporary files
     '''
     shutil.rmtree("temp_models")
 
 def does_path_exist(path):
     '''
-    Funkcja sprawdza czy ścieżka istnieje.
+    Checks if path exists
     '''
     return bool(os.path.exists(path))
 
 def load_the_best_model(trial, classifierName, problemName):
     '''
-    Funkcja ładuje najlepszy model.
+    Loads the best model
     '''
     path = f"temp_models/{problemName}"
     with open("{0}/{1}_{2}_{3}.hdf5".format(path, classifierName, problemName, trial.number), "rb") as fin:
@@ -26,7 +26,7 @@ def load_the_best_model(trial, classifierName, problemName):
 
 def save_model(trial, classifier, model, problemName):
     '''
-    Funkcja zapisuje najlepszy model.
+    Saves model to file for use in the inferface
     '''
     path = f"temp_models/{problemName}"
     create_path_if_does_not_exist(path)
@@ -35,7 +35,7 @@ def save_model(trial, classifier, model, problemName):
 
 def save_model_for_analysis(trial, classifier, model, problemName):
     '''
-    Funkcja zapisuje najlepszy model do analizy.
+    Saves model to file for further analysis
     '''
     path = f"files_for_documentation/models_for_analysis/{problemName}"
     create_path_if_does_not_exist(path)
@@ -44,7 +44,7 @@ def save_model_for_analysis(trial, classifier, model, problemName):
 
 def read_accuray_from_file():
     '''
-    Odczytuje accuracy z pliku
+    Reads accuracy from json file
     '''
     path = "prepared_data"
     create_path_if_does_not_exist(path)
@@ -54,7 +54,7 @@ def read_accuray_from_file():
 
 def save_accuracy_of_model_to_file(model_name, accuracy):
     '''
-    Zapisuje accuracy do pliku
+    Saves accuracy of model to file
     '''
     path = "files_for_documentation/accuracy_of_all_models"
     create_path_if_does_not_exist(path)
@@ -63,7 +63,7 @@ def save_accuracy_of_model_to_file(model_name, accuracy):
 
 def create_path_if_does_not_exist(path):
     '''
-    Ustawia ścieżkę do pliku
+    Creates path if it does not exist
     '''
     if not does_path_exist(path):
         os.makedirs(path)

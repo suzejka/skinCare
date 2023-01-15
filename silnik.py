@@ -11,7 +11,6 @@ from helpers import photos_helper
 warnings.filterwarnings("ignore")
 
 ENCODERS = {}
-LABELS_DESCRIPTION = {}
 SKIN_TYPE = None
 IS_SENSITIVE = None
 MAIN_PROBLEM = None
@@ -40,7 +39,7 @@ ALL_CATEGORICAL_COLUMNS = CATEGORICAL_COLUMN_NAMES + DECISION_COLUMN_NAMES
 
 def predict_my_object(model, objectToPredict, columnName):
     '''
-    Funkcja przewidująca obiekt
+    Predicts new object
     '''
     global ENCODERS
     for categoricalColumn in CATEGORICAL_COLUMN_NAMES:
@@ -55,9 +54,9 @@ def predict_my_object(model, objectToPredict, columnName):
 
 def create_label_encoding(datasetToEncode):
     '''
-    Tworzy kodowanie etykiet
+    Creates label encoding
     '''
-    global ENCODERS, LABELS_DESCRIPTION
+    global ENCODERS
     for categoricalColumn in ALL_CATEGORICAL_COLUMNS:
         ENCODERS[categoricalColumn] = LabelEncoder()
         uniqueValues = list(datasetToEncode[categoricalColumn].unique())
@@ -67,7 +66,7 @@ def create_label_encoding(datasetToEncode):
 
 def create_form():
     '''
-    Funkcja tworzy formularz do wprowadzania danych
+    Creates form for input data
     '''
     global SKIN_TYPE, IS_SENSITIVE, MAIN_PROBLEM, SECOND_PROBLEM, AGE
     form = st.form("my_form")
@@ -124,7 +123,7 @@ def create_form():
 
 def predict_result_using_input_data(userDataFrame):
     '''
-    Funkcja przewidująca wynik na podstawie danych wejściowych
+    Predicts result using input data
     '''
     global RESULT_SKIN_CARE, DECISION_COLUMN_NAMES
     for singleDecisionColumn in DECISION_COLUMN_NAMES:
@@ -135,7 +134,7 @@ def predict_result_using_input_data(userDataFrame):
 
 def show_gui():
     '''
-    Funkcja odpowiedzialna za wyświetlenie interfejsu graficznego.
+    Shows user interface
     '''
     global SKIN_TYPE, IS_SENSITIVE, MAIN_PROBLEM, SECOND_PROBLEM, AGE, ACCURACY, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE, ACCURACY
 
@@ -179,7 +178,7 @@ def show_gui():
 
 def read_products():
     '''
-    Funkcja wczytująca produkty z pliku
+    Read products from file
     '''
     global PRODUCTS
     PRODUCTS = pd.read_csv("raw_data/products.csv", sep=';')

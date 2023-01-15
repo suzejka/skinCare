@@ -4,7 +4,7 @@ import text_cleaner as cleaner
 
 def show_photo_using_link(link):
     '''
-    Wyświetla zdjęcie produktu
+    Shows photo using link
     '''
     if link != "0":
         try:
@@ -15,7 +15,7 @@ def show_photo_using_link(link):
 
 def set_left_photo(category, result, link):
     '''
-    Ustawia zdjęcie produktu po lewej stronie
+    Sets photo of product on the left side
     '''
     col1, col2, = st.columns([1,3])
     with col1:
@@ -29,7 +29,7 @@ def set_left_photo(category, result, link):
 
 def set_right_photo(category, result, link):
     '''
-    Ustawia zdjęcie produktu po prawej stronie
+    Sets photo of product on the right side
     '''
     col1, col2, = st.columns([3,1])
     with col1:
@@ -43,26 +43,26 @@ def set_right_photo(category, result, link):
 
 def set_left_or_right_photo(name, counter, PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE, ACCURACY):
     '''
-    Ustawia zdjęcie produktu na lewo lub prawo naprzemiennie
+    Sets photo of product on the left or right side
     '''
     side = 'left' if counter % 2 == 0 else 'right'
     set_photo(name, side, PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE, ACCURACY)
 
 def does_product_link_exist_in_product_dataset(product, PRODUCTS):
     '''
-    Sprawdza czy link do produktu istnieje w bazie produktów
+    Checks if product link exists in product dataset
     '''
     return PRODUCTS.keys().__contains__(product) or product is not None
 
 def show_only_product_name(category, RESULT_SKIN_CARE):
     '''
-    Wyświetla tylko nazwę produktu
+    Shows only product name
     '''
     st.markdown(cleaner.remove_punctuation_marks(RESULT_SKIN_CARE.get(category)))
 
 def set_photo(category, side, PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, RESULT_SKIN_CARE, ACCURACY):
     '''
-    Ustawia zdjęcie produktu
+    Sets photo of product
     '''
     PREDICTED_PRODUCT = str(RESULT_SKIN_CARE.get(category))
 
@@ -77,5 +77,5 @@ def set_photo(category, side, PRODUCTS, PREDICTED_PRODUCT, CHOSEN_PRODUCT_LINK, 
         set_left_photo(category, RESULT_SKIN_CARE, CHOSEN_PRODUCT_LINK)
     else:
         set_right_photo(category, RESULT_SKIN_CARE, CHOSEN_PRODUCT_LINK)
-    #print accuracy of category rounder to 2 decimal places
+
     st.caption(f"Dokładność przewidywania: {str(round(ACCURACY.get(category) * 100, 2))}%")

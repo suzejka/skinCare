@@ -2,7 +2,7 @@ import streamlit as st
 
 def show_important_information():
     '''
-    Wyświetla informacje o tym, że aplikacja nie jest lekarzem i nie może diagnozować
+    Displays information that the application is not a doctor and cannot diagnose
     '''
     helpMessage = "1. Jeżeli zaproponowana maseczka składa się z dwóch produktów, oznacza to, że na początku należy nałożyć pierwszy produkt i następnie (bez zmywania) nałożyć maseczkę. "\
     "W przypadku kwasu salicylowego, należy odczekać 15/20 minut przed nałożeniem maseczki. \n2. Jeżeli proponowana maseczka zawiera w sobie glinkę, należy pamiętać, "\
@@ -15,7 +15,7 @@ def show_important_information():
 
 def set_configuration_of_page():
     '''
-    Ustawia konfigurację strony
+    Sets configuration of page
     '''
     st.set_page_config(
     page_title="System rekomendacyjny, do tworzenia planów pielęgnacyjnych",
@@ -28,6 +28,6 @@ def set_configuration_of_page():
 
 def if_SPF_change_name_for_user(name):
     '''
-    Funkcja odpowiedzialna za zmianę nazwy produktu SPF na "Krem z filtrem UV"
+    Changes name of SPF product to "Krem z filtrem przeciwsłonecznym"
     '''
     return "Krem z filtrem przeciwsłonecznym" if name == "SPF" else name

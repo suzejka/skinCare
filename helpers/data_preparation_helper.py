@@ -2,7 +2,7 @@ import telegram_bot_for_messages as bot
 
 def get_problem_column_index(problemName):
     '''
-    Funkcja zwraca indeks kolumny z danym problemem.
+    Returns problem column index
     '''
     if problemName == 'Mycie':
         return 5

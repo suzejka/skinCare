@@ -1,6 +1,6 @@
 def clear_skin_type_misspelled_data(datasetToClean):
     '''
-    Funkcja usuwa błędy w danych dotyczących typu cery.
+    Clean misspelled data in skin type column - "Typ cery"
     '''
     datasetToClean.loc[(datasetToClean["Typ cery"] == "tłusta") | 
                         (datasetToClean["Typ cery"] == "tlusta") | 
@@ -11,14 +11,14 @@ def clear_skin_type_misspelled_data(datasetToClean):
 
 def clean_nadprodukcja_sebum(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących nadprodukcji sebum.
+    Clean misspelled data in main or second problem column - "nadprodukcja sebum"
     '''
     datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "nadprodukcja sebum") | 
                         (datasetToClean[mainOrsecondProblem] == "nadprodukcja Sebum"), mainOrsecondProblem] = "Nadprodukcja sebum"
 
 def clean_niedoskonalosci(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących głównego problemu.
+    Clean misspelled data in main or second problem column - "niedoskonałości"
     '''
     datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "niedoskonałości") | 
                         (datasetToClean[mainOrsecondProblem] == "niedoskonalosci") |
@@ -30,7 +30,7 @@ def clean_niedoskonalosci(datasetToClean, mainOrsecondProblem):
             
 def clean_podraznienie(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących głównego problemu.
+    Clean misspelled data in main or second problem column - "podrażnienie"
     '''
     datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "podrażnienie") | 
                         (datasetToClean[mainOrsecondProblem] == "podraznienie") |
@@ -38,13 +38,13 @@ def clean_podraznienie(datasetToClean, mainOrsecondProblem):
                     
 def clean_przebarwienia(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących głównego problemu.
+    Clean misspelled data in main or second problem column - "przebarwienia"
     '''
     datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "przebarwienia"), mainOrsecondProblem] = "Przebarwienia"
 
 def clean_rozszerzone_pory(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących głównego problemu.
+    Clean misspelled data in main or second problem column - "rozszerzone pory"
     '''
     datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "rozszerzone pory") | 
                         (datasetToClean[mainOrsecondProblem] == "Rozszerzone Pory") |
@@ -52,7 +52,7 @@ def clean_rozszerzone_pory(datasetToClean, mainOrsecondProblem):
 
 def clean_suche_skorki(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących głównego problemu.
+    Clean misspelled data in main or second problem column - "suche skórki"
     '''
     datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "suche skórki") | 
                         (datasetToClean[mainOrsecondProblem] == "suche Skórki") |
@@ -62,7 +62,7 @@ def clean_suche_skorki(datasetToClean, mainOrsecondProblem):
 
 def clean_szara_cera(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących głównego problemu.
+    Clean misspelled data in main or second problem column - "szara cera"
     '''
     datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "szara cera") | 
                         (datasetToClean[mainOrsecondProblem] == "szara Cera") |
@@ -70,7 +70,7 @@ def clean_szara_cera(datasetToClean, mainOrsecondProblem):
 
 def clean_widoczne_naczynka(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących głównego problemu.
+    Clean misspelled data in main or second problem column - "widoczne naczynka"
     '''
     datasetToClean.loc[(datasetToClean[mainOrsecondProblem] == "widoczne naczynka") | 
                         (datasetToClean[mainOrsecondProblem] == "Widoczne Naczynka") |
@@ -78,7 +78,7 @@ def clean_widoczne_naczynka(datasetToClean, mainOrsecondProblem):
 
 def clean_main_or_second_problem_misspelled_data(datasetToClean, mainOrsecondProblem):
     '''
-    Funkcja usuwa błędy w danych dotyczących głównego problemu.
+    Clean misspelled data in main or second problem column
     '''
     clean_nadprodukcja_sebum(datasetToClean, mainOrsecondProblem)
     clean_niedoskonalosci(datasetToClean, mainOrsecondProblem)
@@ -94,7 +94,7 @@ def clean_main_or_second_problem_misspelled_data(datasetToClean, mainOrsecondPro
 
 def clean_data(datasetToClean):
     '''
-    Funkcja usuwa błędy w danych.
+    Clean data in dataset
     '''
     datasetToClean = datasetToClean.loc[:, ~datasetToClean.columns.str.contains('^Unnamed')]
     datasetToClean.replace(u'\xa0', u' ', regex=True, inplace=True)
@@ -109,13 +109,13 @@ def clean_data(datasetToClean):
 
 def remove_punctuation_marks(text):
     '''
-    Funkcja usuwa znaki interpunkcyjne z tekstu.
+    Remove punctuation marks from text
     '''
     text = str(text).replace("'","").replace("[","").replace("]","").replace("\\xa0", " ")
     return text
 
 def clean_product_link(product, PRODUCTS):
     '''
-    Czyści link do produktu
+    Clean product link
     '''
     return remove_punctuation_marks(str(PRODUCTS.get(remove_punctuation_marks(product)))).replace("{","").replace("0: ","").replace("}","")

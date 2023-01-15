@@ -18,35 +18,16 @@ import optuna
 from helpers.data_preparation_helper import get_problem_column_index
 warnings.filterwarnings("ignore")
 
-ENCODER = None
 ENCODERS = {}
-LABELS_DESCRIPTION = {}
-SKIN_TYPE = None
-IS_SENSITIVE = None
-MAIN_PROBLEM = None
-SECOND_PROBLEM = None
-AGE = None
-RESULT_SKIN_CARE = {}
 ACCURACY = {}
 PRODUCTS = {}
-LINK = None
-CHOSEN_PRODUCT = None
 DATASET = None
-VALIDATION_DATASET = None
 
-labeledDataset_global = None
+LABELED_DATASET_GLOBAL = None
 
-best_model_decision_tree = {}
-best_model_knn = {}
-best_model_random_forest = {}
-
-optuna_score_knn = {}
-optuna_score_decision_tree = {}
-optuna_score_random_forest = {}
-
-optuna_best_params_knn = {}
-optuna_best_params_decision_tree = {}
-optuna_best_params_random_forest = {}
+BEST_MODEL_DECISION_TREE = {}
+BEST_MODEL_KNN = {}
+BEST_MODEL_RANDOM_FOREST = {}
 
 problem_global = None
 
@@ -72,7 +53,7 @@ ALL_CATEGORICAL_COLUMNS = CATEGORICAL_COLUMN_NAMES + DECISION_COLUMN_NAMES
 
 def create_synthetic_data(dataset):
     '''
-    Funkcja tworzy syntetyczne dane.
+    Function creates synthetic data.
     '''       
     model = GaussianCopula()
     model.fit(dataset)
@@ -82,7 +63,7 @@ def create_synthetic_data(dataset):
 
 def make_single_problem_tree(problemName, dumDf, modelName, **kwargs):
     '''
-    Funkcja tworzy drzewo decyzyjne dla pojedynczego problemu.
+    Function creates a single problem tree.
     '''
     global X_train, X_test, y_train, y_test
     problemIndex = get_problem_column_index(problemName)
@@ -116,25 +97,25 @@ def make_single_problem_tree(problemName, dumDf, modelName, **kwargs):
 
 def get_the_best_model_and_best_score_for_problem(problem):
     '''
-    Funkcja zwraca najlepszy model i najlepszy wynik dla danego problemu.
+    Funcion returns the best model and the best score for given problem.
     '''
-    global best_model_knn, best_model_decision_tree, best_model_random_forest
-    best_score = max(best_model_decision_tree[problem][1], best_model_knn[problem][1], best_model_random_forest[problem][1])
-    if best_score == best_model_decision_tree[problem][1]:
-        return best_model_decision_tree[problem][0], best_score
-    elif best_score == best_model_knn[problem][1]:
-        return best_model_knn[problem][0], best_score
+    global BEST_MODEL_KNN, BEST_MODEL_DECISION_TREE, BEST_MODEL_RANDOM_FOREST
+    best_score = max(BEST_MODEL_DECISION_TREE[problem][1], BEST_MODEL_KNN[problem][1], BEST_MODEL_RANDOM_FOREST[problem][1])
+    if best_score == BEST_MODEL_DECISION_TREE[problem][1]:
+        return BEST_MODEL_DECISION_TREE[problem][0], best_score
+    elif best_score == BEST_MODEL_KNN[problem][1]:
+        return BEST_MODEL_KNN[problem][0], best_score
     else:
-        return best_model_random_forest[problem][0], best_score
+        return BEST_MODEL_RANDOM_FOREST[problem][0], best_score
 
 def tune_random_forest_optuna():
     '''
-    Funkcja znajduje najlepsze parametry dla modelu RandomForestClassifier.
+    Function finds the best parameters for RandomForrestClassifier
     '''
-    global problem_global, best_model_random_forest
+    global problem_global, BEST_MODEL_RANDOM_FOREST
 
     def objective(trial):
-        global problem_global, labeledDataset_global, X_train, X_test, y_train, y_test
+        global problem_global, LABELED_DATASET_GLOBAL, X_train, X_test, y_train, y_test
         criterion = trial.suggest_categorical('criterion', ['gini', 'entropy'])
         max_depth = trial.suggest_int('max_depth', 4, 50, step=2)
         max_features = trial.suggest_categorical('max_features', ['auto', 'sqrt', 'log2'])
@@ -142,7 +123,7 @@ def tune_random_forest_optuna():
         min_samples_split = trial.suggest_int('min_samples_split', 2, 10)
         n_estimators = trial.suggest_int('n_estimators', 100, 1000, step=100)
 
-        model = make_single_problem_tree(problem_global, labeledDataset_global, criterion=criterion, max_depth=max_depth, maxFeatures=max_features, min_samples_leaf=min_samples_leaf, min_samples_split=min_samples_split, nEstimators=n_estimators, modelName='RandomForestClassifier')
+        model = make_single_problem_tree(problem_global, LABELED_DATASET_GLOBAL, criterion=criterion, max_depth=max_depth, maxFeatures=max_features, min_samples_leaf=min_samples_leaf, min_samples_split=min_samples_split, nEstimators=n_estimators, modelName='RandomForestClassifier')
         model.fit(X_train, y_train)
         yPrediction = model.predict(X_test)
 
@@ -156,10 +137,8 @@ def tune_random_forest_optuna():
         problem_global = problem
         study = optuna.create_study(direction='maximize')
         study.optimize(objective, n_trials=100)
-        optuna_score_random_forest[problem] = study.best_value
-        optuna_best_params_random_forest[problem] = study.best_params
         best_model = load_the_best_model(study.best_trial, 'RandomForestClassifier', problem)
-        best_model_random_forest[problem] = [best_model, study.best_value]
+        BEST_MODEL_RANDOM_FOREST[problem] = [best_model, study.best_value]
         current_model_accuracy[problem] = study.best_value
         save_model_for_analysis(trial=study.best_trial, model=best_model, classifier='RandomForestClassifier', problemName=counter)
         remove_temporary_files()
@@ -169,17 +148,17 @@ def tune_random_forest_optuna():
 
 def tune_decision_tree_optuna():
     '''
-    Funkcja dokonuje optymalizacji parametrów drzewa decyzyjnego.
+    Function finds the best parameters for DecisionTreeClassifier.
     '''
-    global problem_global, best_model_decision_tree
+    global problem_global, BEST_MODEL_DECISION_TREE
     def objective(trial):
-        global problem_global, labeledDataset_global, X_train, X_test, y_train, y_test
+        global problem_global, LABELED_DATASET_GLOBAL, X_train, X_test, y_train, y_test
         criterion = trial.suggest_categorical('criterion', ['gini', 'entropy'])
         max_depth = trial.suggest_int('max_depth', 4, 50, step=2)
         min_samples_leaf = trial.suggest_int('min_samples_leaf', 1, 10)
         min_samples_split = trial.suggest_int('min_samples_split', 2, 10)
 
-        model = make_single_problem_tree(problem_global, labeledDataset_global, criterion=criterion, max_depth=max_depth, min_samples_leaf=min_samples_leaf, min_samples_split=min_samples_split, modelName='DecisionTreeClassifier')
+        model = make_single_problem_tree(problem_global, LABELED_DATASET_GLOBAL, criterion=criterion, max_depth=max_depth, min_samples_leaf=min_samples_leaf, min_samples_split=min_samples_split, modelName='DecisionTreeClassifier')
         model.fit(X_train, y_train)
         prediction = model.predict(X_test)
 
@@ -193,10 +172,8 @@ def tune_decision_tree_optuna():
         problem_global = problem
         study = optuna.create_study(direction='maximize')
         study.optimize(objective, n_trials=20)
-        optuna_score_decision_tree[problem] = study.best_value
-        optuna_best_params_decision_tree[problem] = study.best_params
         best_model = load_the_best_model(study.best_trial, 'DecisionTreeClassifier', problem)
-        best_model_decision_tree[problem] = [best_model, study.best_value] 
+        BEST_MODEL_DECISION_TREE[problem] = [best_model, study.best_value] 
         current_model_accuracy[problem] = study.best_value
         save_model_for_analysis(trial=study.best_trial, model=best_model, classifier='DecisionTreeClassifier', problemName=counter)
         remove_temporary_files()
@@ -206,17 +183,17 @@ def tune_decision_tree_optuna():
         
 def tune_knn_optuna():
     '''
-    Funkcja dokonuje optymalizacji hiperparametrów dla klasyfikatora KNN.
+    Function finds the best parameters for the KNeighborsClassifier model.
     '''
-    global problem_global, best_model_knn
+    global problem_global, BEST_MODEL_KNN
 
     def objective(trial):
-        global problem_global, labeledDataset_global, X_train, X_test, y_train, y_test         
+        global problem_global, LABELED_DATASET_GLOBAL, X_train, X_test, y_train, y_test         
         n_neighbors = trial.suggest_int("n_neighbors", 1, 20)
         weights = trial.suggest_categorical("weights", ['uniform', 'distance'])
         metric = trial.suggest_categorical("metric", ['euclidean', 'manhattan', 'minkowski'])
         
-        model = make_single_problem_tree(problem_global, labeledDataset_global, n_neighbors=n_neighbors, weights=weights, metric=metric, modelName='KNeighborsClassifier')       
+        model = make_single_problem_tree(problem_global, LABELED_DATASET_GLOBAL, n_neighbors=n_neighbors, weights=weights, metric=metric, modelName='KNeighborsClassifier')       
         model.fit(X_train, y_train)
         yPrediction = model.predict(X_test)
 
@@ -231,10 +208,8 @@ def tune_knn_optuna():
         problem_global = problem
         study = optuna.create_study(direction='maximize')
         study.optimize(objective, n_trials=100)
-        optuna_score_knn[problem] = study.best_value
-        optuna_best_params_knn[problem] = study.best_params
         best_model = load_the_best_model(study.best_trial, 'KNeighborsClassifier', problem)
-        best_model_knn[problem] = [best_model, study.best_value]
+        BEST_MODEL_KNN[problem] = [best_model, study.best_value]
         current_model_accuracy[problem] = study.best_value
         save_model_for_analysis(trial=study.best_trial, model=best_model, classifier='KNeighborsClassifier', problemName=counter)
         remove_temporary_files()
@@ -244,9 +219,9 @@ def tune_knn_optuna():
         
 def create_label_encoding(datasetToEncode):
     '''
-    Funkcja tworzy kodowanie etykiet dla kolumn kategorycznych.
+    Function that encodes categorical columns to numerical values.
     '''
-    global ENCODERS, LABELS_DESCRIPTION
+    global ENCODERS
     for categoricalColumn in ALL_CATEGORICAL_COLUMNS:
         ENCODERS[categoricalColumn] = LabelEncoder() # add categories
         uniqueValues = list(datasetToEncode[categoricalColumn].unique())
@@ -256,14 +231,14 @@ def create_label_encoding(datasetToEncode):
 
 def tune_models():
     '''
-    Funkcja wywołuje funkcje do optymalizacji parametrów modeli.
+    Function that tunes models for each problem.
     '''
     tune_decision_tree_optuna()
     tune_knn_optuna()
     tune_random_forest_optuna()
 
 def choose_best_model_for_problem(problem):
-    global optuna_best_params_decision_tree, optuna_best_params_knn, optuna_best_params_random_forest, ACCURACY
+    global ACCURACY
 
     bestModel, bestScore = get_the_best_model_and_best_score_for_problem(problem)
     
@@ -273,7 +248,7 @@ def choose_best_model_for_problem(problem):
 
 def build_models():
     '''
-    Funkcja buduje modele drzewa decyzyjnego dla wszystkich problemów.
+    Function that builds models for each problem.
     '''
     tune_models()
 
@@ -281,26 +256,35 @@ def build_models():
         choose_best_model_for_problem(problem)
 
 def main():
-    global PRODUCTS, DATASET, ACCURACY, labeledDataset_global
+    global PRODUCTS, DATASET, ACCURACY, LABELED_DATASET_GLOBAL
 
-    PRODUCTS = pd.read_csv("raw_data/products.csv", sep=';') # pobranie produktów z pliku    
-    DATASET = pd.read_csv("raw_data/daneSkinCare.csv") # pobranie danych z pliku
+    PRODUCTS = pd.read_csv("raw_data/products.csv", sep=';')
+    DATASET = pd.read_csv("raw_data/daneSkinCare.csv")
 
     PRODUCTS = PRODUCTS.to_dict()
-    DATASET = cleaner.clean_data(DATASET) # czyszczenie danych
+    DATASET = cleaner.clean_data(DATASET)
 
-    synthetic = create_synthetic_data(DATASET) # tworzenie danych syntetycznych
+    synthetic = create_synthetic_data(DATASET)
 
-    DATASET = DATASET.append(synthetic, ignore_index=True) # dodanie danych syntetycznych do zbioru danych
+    # adding synthetic data to dataset
+    DATASET = DATASET.append(synthetic, ignore_index=True)
 
+    # checking if folder exists, if not, create it
     folder = "prepared_data"
     create_path_if_does_not_exist(folder)
-    DATASET.to_csv("prepared_data/DATASET.csv", index=False, encoding='utf-16', sep=',') # UTF-16 to encoding, który obsługuje polskie znaki
+
+    # export dataset to csv using utf-16 encoding to support polish characters
+    DATASET.to_csv("prepared_data/DATASET.csv", index=False, encoding='utf-16', sep=',') 
    
-    labeledDataset_global = create_label_encoding(DATASET) # tworzenie kodowania etykiet
-    labeledDataset_global.to_csv("prepared_data/labeledDataset.csv", index=False, sep=',')
-    build_models() # budowanie modeli
+    LABELED_DATASET_GLOBAL = create_label_encoding(DATASET)
+
+    # export labeled dataset to csv
+    LABELED_DATASET_GLOBAL.to_csv("prepared_data/labeledDataset.csv", index=False, sep=',')
+
+    # building models and saving them to file
+    build_models()
     
+    # saving accuracy of models to file
     with open('prepared_data/accuracy.json', 'w') as fp:
         json.dump(ACCURACY, fp)
 
