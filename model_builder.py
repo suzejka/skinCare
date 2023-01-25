@@ -223,7 +223,7 @@ def create_label_encoding(datasetToEncode):
     '''
     global ENCODERS
     for categoricalColumn in ALL_CATEGORICAL_COLUMNS:
-        ENCODERS[categoricalColumn] = LabelEncoder() # add categories
+        ENCODERS[categoricalColumn] = LabelEncoder()
         uniqueValues = list(datasetToEncode[categoricalColumn].unique())
         ENCODERS[categoricalColumn] = ENCODERS[categoricalColumn].fit(uniqueValues)
         datasetToEncode[categoricalColumn] = ENCODERS[categoricalColumn].transform(datasetToEncode[categoricalColumn])
