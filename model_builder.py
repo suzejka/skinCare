@@ -243,7 +243,7 @@ def choose_best_model_for_problem(problem):
     bestModel, bestScore = get_the_best_model_and_best_score_for_problem(problem)
     
     ACCURACY[problem] = bestScore
-    filename = "{filename}.sv".format(filename = problem.replace(" ", "_"))
+    filename = "models/{filename}.sv".format(filename = problem.replace(" ", "_"))
     pickle.dump(bestModel, open(filename,'wb'))
 
 def build_models():
