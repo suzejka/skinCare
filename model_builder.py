@@ -57,7 +57,7 @@ def create_synthetic_data(dataset):
     '''       
     model = GaussianCopula()
     model.fit(dataset)
-    synthetic_data = model.sample(5000 - dataset.shape[0])
+    synthetic_data = model.sample(5000)
     synthetic_data = synthetic_data[ALL_COLUMNS]
     return synthetic_data
 
@@ -229,6 +229,26 @@ def create_label_encoding(datasetToEncode):
         datasetToEncode[categoricalColumn] = ENCODERS[categoricalColumn].transform(datasetToEncode[categoricalColumn])
     return datasetToEncode
 
+def save_highest_accuracy_for_the_best_models():
+    '''
+    Function that saves the highest accuracy for the best models.
+    '''
+    with open('files_for_documentation/accuracy_of_all_models/accuracy_of_DecisionTreeClassifier.json', "r") as file:
+        dt_accuracy = json.load(file)
+    with open("files_for_documentation/accuracy_of_all_models/accuracy_of_KNeighborsClassifier.json", "r") as file:
+        knn_accuracy = json.load(file)
+    with open("files_for_documentation/accuracy_of_all_models/accuracy_of_RandomForestClassifier.json", "r") as file:
+        rf_accuracy = json.load(file)
+
+    highest_accuracy = {
+        category: max(
+            dt_accuracy[category], knn_accuracy[category], rf_accuracy[category]
+        )
+        for category in dt_accuracy
+    }
+    with open("prepared_data/accuracy.json", "w") as file:
+        json.dump(highest_accuracy, file)
+
 def tune_models():
     '''
     Function that tunes models for each problem.
@@ -285,8 +305,7 @@ def main():
     build_models()
     
     # saving accuracy of models to file
-    with open('prepared_data/accuracy.json', 'w') as fp:
-        json.dump(ACCURACY, fp)
+    save_highest_accuracy_for_the_best_models()
 
 if __name__ == '__main__':
     main()
