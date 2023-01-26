@@ -171,7 +171,7 @@ def tune_decision_tree_optuna():
     for problem in DECISION_COLUMN_NAMES:
         problem_global = problem
         study = optuna.create_study(direction='maximize')
-        study.optimize(objective, n_trials=20)
+        study.optimize(objective, n_trials=100)
         best_model = load_the_best_model(study.best_trial, 'DecisionTreeClassifier', problem)
         BEST_MODEL_DECISION_TREE[problem] = [best_model, study.best_value] 
         current_model_accuracy[problem] = study.best_value
