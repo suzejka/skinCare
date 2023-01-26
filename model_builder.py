@@ -19,7 +19,6 @@ from helpers.data_preparation_helper import get_problem_column_index
 warnings.filterwarnings("ignore")
 
 ENCODERS = {}
-ACCURACY = {}
 PRODUCTS = {}
 DATASET = None
 
@@ -257,12 +256,12 @@ def tune_models():
     tune_knn_optuna()
     tune_random_forest_optuna()
 
-def choose_best_model_for_problem(problem):
-    global ACCURACY
-
+def save_best_model_for_problem(problem):
+    '''
+    Function that saves the best model for the problem to the json file.
+    '''
     bestModel, bestScore = get_the_best_model_and_best_score_for_problem(problem)
     
-    ACCURACY[problem] = bestScore
     filename = "models/{filename}.sv".format(filename = problem.replace(" ", "_"))
     pickle.dump(bestModel, open(filename,'wb'))
 
@@ -273,10 +272,10 @@ def build_models():
     tune_models()
 
     for problem in DECISION_COLUMN_NAMES:
-        choose_best_model_for_problem(problem)
+        save_best_model_for_problem(problem)
 
 def main():
-    global PRODUCTS, DATASET, ACCURACY, LABELED_DATASET_GLOBAL
+    global PRODUCTS, DATASET, LABELED_DATASET_GLOBAL
 
     PRODUCTS = pd.read_csv("raw_data/products.csv", sep=';')
     DATASET = pd.read_csv("raw_data/daneSkinCare.csv")
